@@ -1,5 +1,3 @@
-# geometry_attention.py
-
 import numpy as np
 
 
@@ -68,3 +66,5 @@ def compute_attention(gaze_eye, R_head, distance, screen_width=0.5):
     # В лог возвращаем "чистый" alpha без EXTRA_MARGIN_DEG,
     # чтобы видеть физический полуугол конуса.
     return attention, np.degrees(theta), alpha_deg
+
+

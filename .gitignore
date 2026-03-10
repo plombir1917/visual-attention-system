@@ -1,0 +1,34 @@
+# Python / build
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# IDE / editor
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Checkpoints / large artifacts
+model/checkpoints/
+model/data/*.h5
+model/data/*.json
+
+# FastAPI / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+

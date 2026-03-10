@@ -1,5 +1,3 @@
-# headpose.py
-
 import cv2
 import numpy as np
 
@@ -68,3 +66,5 @@ def estimate_distance(landmarks, frame_width, focal_length=900):
 
     distance = (focal_length * real_ipd) / ipd_pixels
     return distance
+
+

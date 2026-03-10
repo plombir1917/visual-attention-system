@@ -9,8 +9,8 @@ from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch.nn.functional as F
 
-from dataset import UnityEyesDataset
-from model import GazeCNN
+from core.dataset import UnityEyesDataset
+from core.model import GazeCNN
 
 
 # ------------------------
@@ -33,6 +33,7 @@ EARLY_STOPPING_PATIENCE = 7
 # ------------------------
 # Stable Angular Loss
 # ------------------------
+
 
 def angular_loss(pred, target):
     """
@@ -67,6 +68,7 @@ def angular_error_deg(pred, target):
 # ------------------------
 # Train
 # ------------------------
+
 
 def train():
 
@@ -147,7 +149,7 @@ def train():
             optimizer.zero_grad()
             loss.backward()
 
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+            torch.nn.utils.clip_grad_norm_((model.parameters()), 5.0)
 
             optimizer.step()
 
@@ -225,3 +227,4 @@ def train():
 
 if __name__ == "__main__":
     train()
+

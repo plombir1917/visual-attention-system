@@ -1,0 +1,10 @@
+fastapi[standard]
+uvicorn
+websockets
+opencv-python
+mediapipe
+torch
+numpy
+h5py
+tqdm
+

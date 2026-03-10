@@ -7,6 +7,7 @@ import torch.nn.functional as F
 # Residual Block
 # ------------------------
 
+
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride: int = 1):
         super().__init__()

@@ -7,8 +7,9 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from dataset import UnityEyesDataset
-from model import GazeCNN
+from core.dataset import UnityEyesDataset
+from core.model import GazeCNN
+
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -62,3 +63,4 @@ def evaluate():
 
 if __name__ == "__main__":
     evaluate()
+
