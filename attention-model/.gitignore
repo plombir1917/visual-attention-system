@@ -23,9 +23,9 @@ logs/
 *.log
 
 # Checkpoints / large artifacts
-model/checkpoints/
-model/data/*.h5
-model/data/*.json
+attention-model/checkpoints/
+attention-model/data/*.h5
+attention-model/data/*.json
 
 # FastAPI / tooling
 .pytest_cache/

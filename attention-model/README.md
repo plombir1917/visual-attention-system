@@ -7,11 +7,10 @@
 - **clients**: клиенты, которые пользуются API (desktop, web и т.п.).
 - **scripts**: скрипты/entrypoints для обучения, оценки и локального запуска.
 
-### Структура папок (упрощённо)
+### Структура папок
 
 ```text
-visual-attention-system/
-├─ model/
+├─ attention-model/
 │  └─ src/
 │     ├─ core/                 # Ядро ML-системы
 │     │  ├─ attention_pipeline.py   # AttentionPipeline: frame -> structured result
@@ -82,7 +81,7 @@ api/attention_service.py
 
 ### Установка зависимостей
 
-Из директории `model`:
+Из директории `attention-model`:
 
 ```bash
 python -m venv .venv
@@ -92,7 +91,7 @@ pip install -r requirements.txt
 
 ### Как запускать
 
-Из директории `model/src`:
+Из директории `attention-model/src`:
 
 - **Сервис внимания (WebSocket)**:
 
