@@ -8,7 +8,7 @@ import numpy as np
 import websockets
 
 
-WEBSOCKET_URL = "ws://localhost:8765/attention"
+WEBSOCKET_URL = "ws://localhost:8080/ws" #FIXME
 SEND_EVERY_N_FRAMES = 2
 
 

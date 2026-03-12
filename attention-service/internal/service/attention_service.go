@@ -16,7 +16,7 @@ func ProcessMessage(clientWS *websocket.Conn, modelWS *websocket.Conn) {
 		}
 
 		// отправляем сообщение в модель
-		err = modelWS.WriteMessage(websocket.TextMessage, msg)
+		err = modelWS.WriteMessage(websocket.BinaryMessage, msg)
 		if err != nil {
 			fmt.Println("Model write:", err)
 			break
