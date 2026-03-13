@@ -1,31 +1,25 @@
 package service
 
 import (
-	"attention-service/storage"
 	"context"
 	"fmt"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
 )
 
-var ctx = context.Background()
+type AttentionService struct {
+	redis *redis.Client
+}
 
-func ProcessMessage(clientWS *websocket.Conn, modelWS *websocket.Conn) {
-	cfg := storage.Config{
-		Addr:        "",
-		Password:    "",
-		User:        "",
-		DB:          11,
-		MaxRetries:  10,
-		DialTimeout: time.Second * 10,
-		Timeout:     time.Second * 10,
+func NewAttentionService(redis *redis.Client) *AttentionService {
+	return &AttentionService{
+		redis: redis,
 	}
+}
 
-	db, err := storage.NewClient(ctx, cfg)
-	if err != nil {
-		panic(err)
-	}
+func (as *AttentionService) ProcessMessage(ctx context.Context, clientWS *websocket.Conn, modelWS *websocket.Conn) {
 
 	for {
 		// читаем сообщение
@@ -50,7 +44,7 @@ func ProcessMessage(clientWS *websocket.Conn, modelWS *websocket.Conn) {
 		}
 
 		// REDIS HERE
-		if err := db.Set(ctx, time.Now().String(), msg, 2*time.Hour).Err(); err != nil {
+		if err := as.redis.Set(ctx, time.Now().String(), msg, 2*time.Hour).Err(); err != nil {
 			fmt.Printf("failed to set data, error: %s", err.Error())
 		}
 		//

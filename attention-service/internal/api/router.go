@@ -2,13 +2,16 @@ package api
 
 import (
 	"attention-service/internal/api/handlers"
+	"attention-service/internal/service"
 	"net/http"
 )
 
-func NewRouter() *http.ServeMux {
+func NewRouter(attentionService *service.AttentionService) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/ws", handlers.HandleWS)
+	wsHandler := handlers.NewWSHandler(attentionService)
+
+	mux.HandleFunc("/ws", wsHandler.HandleWS)
 
 	return mux
 }
