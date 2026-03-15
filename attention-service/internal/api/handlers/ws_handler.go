@@ -9,9 +9,17 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type WSHandler struct {
+	attentionService *service.AttentionService
+}
+
 const modelWsAddr = "ws://localhost:8765/attention" //FIXME
 
-func HandleWS(w http.ResponseWriter, r *http.Request) {
+func NewWSHandler(attentionService *service.AttentionService) *WSHandler {
+	return &WSHandler{attentionService: attentionService}
+}
+
+func (h *WSHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 	clientWS, err := ws.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -28,5 +36,7 @@ func HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Client connected")
 
-	service.ProcessMessage(clientWS, modelWS)
+	ctx := r.Context()
+
+	h.attentionService.ProcessMessage(ctx, clientWS, modelWS)
 }
