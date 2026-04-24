@@ -1,0 +1,10 @@
+services:
+  kafka:
+    image: bitnami/kafka:latest
+  redis: 
+    image: redis:8.2.5-bookworm
+  postgres: 
+    image: postgres:16.13-bookworm
+  attention-model:
+  attention-service:
+  analytics-service:
