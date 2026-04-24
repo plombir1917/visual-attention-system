@@ -8,8 +8,8 @@ import numpy as np
 import websockets
 
 
-WEBSOCKET_URL = "ws://localhost:8765/attention"
-SEND_EVERY_N_FRAMES = 2
+WEBSOCKET_URL = "ws://localhost:8080/ws" #FIXME
+SEND_EVERY_N_FRAMES = 30
 
 
 def _encode_frame_to_jpeg_bytes(frame: np.ndarray) -> bytes:
