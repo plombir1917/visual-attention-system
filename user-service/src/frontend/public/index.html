@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ФОКУС — Контроль внимания в реальном времени</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #ffffff;
+  --bg2:     #f7f8fc;
+  --text:    #0b0e1a;
+  --muted:   #64748b;
+  --dim:     #94a3b8;
+  --border:  rgba(0,0,0,0.07);
+  --blue:    #2563eb;
+  --blue-lt: #eff6ff;
+  --card:    #ffffff;
+  --shadow:  0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.09);
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+::selection { background: rgba(37,99,235,0.15); }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 2px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp   { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+@keyframes pulse    { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+@keyframes spin     { to{transform:rotate(360deg)} }
+@keyframes orbFloat1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(40px,-30px) scale(1.06); }
+  66%     { transform: translate(-25px,35px) scale(.96); }
+}
+@keyframes orbFloat2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(-45px,25px) scale(1.08); }
+}
+@keyframes orbFloat3 {
+  0%,100% { transform: translate(0,0); }
+  40%     { transform: translate(30px,40px); }
+  80%     { transform: translate(-30px,-20px); }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity .72s cubic-bezier(.16,1,.3,1), transform .72s cubic-bezier(.16,1,.3,1);
+}
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-d1{transition-delay:.07s} .reveal-d2{transition-delay:.14s}
+.reveal-d3{transition-delay:.21s} .reveal-d4{transition-delay:.28s}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  height: 64px; display:flex; align-items:center;
+  justify-content: space-between; padding: 0 52px;
+  background: rgba(255,255,255,.07);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid transparent;
+  transition: border-color .3s, box-shadow .3s;
+}
+nav.scrolled { border-color: var(--border); box-shadow: 0 1px 0 rgba(0,0,0,0.06); }
+.nav-link { font-size:14px; font-weight:500; color:var(--muted); text-decoration:none; transition:color .2s; }
+.nav-link:hover { color:var(--text); }
+.nav-cta {
+  background: var(--text); color:#fff; border:none; border-radius:8px;
+  padding:9px 20px; font-size:13px; font-weight:600;
+  font-family:'Inter',sans-serif; cursor:pointer; text-decoration:none;
+  transition: background .2s, transform .15s, box-shadow .15s; display:inline-block;
+}
+.nav-cta:hover { background:#1e293b; transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.18); }
+
+/* ── HERO BACKGROUND ── */
+.hero-section {
+  position: relative;
+  /* dot grid */
+  background-color: #ffffff;
+  background-image: radial-gradient(rgba(37,99,235,0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  overflow: hidden;
+}
+/* fade edges */
+.hero-section::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background:
+    radial-gradient(ellipse 55% 80% at 0% 50%,  rgba(255,255,255,.95) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 80% at 100% 50%, rgba(255,255,255,.95) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 30% at 50% 100%, rgba(255,255,255,1) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 30% at 50% 0%,  rgba(255,255,255,1) 0%, transparent 60%);
+}
+.hero-orb {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  filter: blur(80px); z-index: 0;
+}
+
+/* ── HERO LAYOUT ── */
+.hero-inner {
+  position: relative; z-index: 2;
+  max-width: 1280px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; align-items: center;
+  padding: 96px 52px 72px;
+  min-height: 100vh;
+}
+
+/* ── FORM ── */
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--blue-lt); border:1px solid rgba(37,99,235,.18);
+  border-radius:100px; padding:5px 14px 5px 8px;
+  font-size:11px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--blue); margin-bottom:28px;
+}
+.hero-badge-dot { width:6px; height:6px; border-radius:50%; background:var(--blue); animation:pulse 2s infinite; }
+.hero-h1 { font-size:clamp(44px,5.2vw,76px); font-weight:900; line-height:1.03; letter-spacing:-.04em; margin-bottom:24px; }
+.hero-h1 .accent { color:var(--blue); }
+
+.form-field {
+  background:#fff; border:1px solid rgba(0,0,0,0.12);
+  border-radius:10px; padding:13px 16px; font-size:14px; color:var(--text);
+  font-family:'Inter',sans-serif; outline:none; width:100%;
+  transition:border-color .2s, box-shadow .2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.form-field::placeholder { color:var(--dim); }
+.form-field:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+.btn-primary {
+  background:var(--blue); color:#fff; border:none; border-radius:10px;
+  padding:14px 28px; font-size:14px; font-weight:700;
+  font-family:'Inter',sans-serif; cursor:pointer; width:100%;
+  transition:background .2s, transform .15s, box-shadow .15s;
+}
+.btn-primary:hover { background:#1d4ed8; transform:translateY(-1px); box-shadow:0 6px 24px rgba(37,99,235,.3); }
+.btn-primary:active { transform:translateY(0); }
+
+/* ── SECTIONS ── */
+section { padding: 112px 0; }
+.section-wrap { max-width:1280px; margin:0 auto; padding:0 52px; }
+.section-eyebrow { font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--blue); margin-bottom:18px; }
+.section-h2 { font-size:clamp(34px,3.8vw,58px); font-weight:800; line-height:1.06; letter-spacing:-.035em; }
+
+/* ── PROBLEM ── */
+.problem-scenario {
+  display:flex; gap:20px; align-items:flex-start;
+  padding:22px 26px; background:#fff; border:1px solid var(--border);
+  border-radius:14px; box-shadow:var(--shadow);
+  transition:box-shadow .25s, transform .25s;
+}
+.problem-scenario:hover { box-shadow:var(--shadow-md); transform:translateX(3px); }
+.problem-time { font-size:11px; font-weight:700; color:var(--blue); letter-spacing:.05em; padding-top:2px; min-width:42px; white-space:nowrap; }
+.problem-text { font-size:15px; line-height:1.6; }
+.problem-text .strike { text-decoration:line-through; color:var(--dim); }
+
+/* ── STEPS ── */
+.step-card {
+  padding:28px 22px; background:#fff; border:1px solid var(--border);
+  border-radius:16px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+  transition:box-shadow .25s, transform .25s;
+}
+.step-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--blue); opacity:0; transition:opacity .25s; }
+.step-card:hover { box-shadow:var(--shadow-md); transform:translateY(-3px); }
+.step-card:hover::before { opacity:1; }
+.step-num { font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--blue); margin-bottom:16px; }
+.step-title { font-size:16px; font-weight:700; margin-bottom:8px; }
+.step-desc { font-size:13px; color:var(--muted); line-height:1.65; }
+
+/* ── BENEFITS ── */
+.benefit-row { display:flex; gap:18px; align-items:flex-start; padding-bottom:24px; margin-bottom:24px; border-bottom:1px solid var(--border); }
+.benefit-row:last-child { border:none; padding:0; margin:0; }
+.benefit-icon { width:38px; height:38px; flex-shrink:0; border-radius:10px; background:var(--blue-lt); border:1px solid rgba(37,99,235,.15); display:flex; align-items:center; justify-content:center; color:var(--blue); }
+.stat-number { font-size:clamp(44px,5.5vw,72px); font-weight:900; letter-spacing:-.04em; line-height:1; }
+.stat-unit { color:var(--blue); }
+.stat-label { font-size:13px; color:var(--muted); margin-top:6px; line-height:1.5; }
+
+/* ── CTA DARK ── */
+.cta-dark { background:#0b0e1a; color:#fff; padding:0; border:none; text-align:center; position:relative; overflow:hidden; }
+.cta-glow { position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse 70% 50% at 50% 100%, rgba(37,99,235,.12) 0%, transparent 70%); }
+
+/* ── SOLUTION GRID ── */
+.solution-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
+.solution-cell { background:#fff; padding:40px 34px; transition:background .2s; }
+.solution-cell:hover { background:#fafbff; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:32px; right:32px; z-index:999; background:#fff; border:1px solid rgba(37,99,235,.25); border-radius:12px; padding:16px 22px; font-size:14px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:10px; transform:translateY(80px); opacity:0; transition:transform .4s cubic-bezier(.34,1.56,.64,1), opacity .3s; box-shadow:0 8px 40px rgba(0,0,0,.12); }
+.toast.show { transform:translateY(0); opacity:1; }
+
+@media(max-width:960px){
+  nav { padding:0 20px; }
+  .hero-inner { grid-template-columns:1fr; padding:100px 20px 60px; gap:48px; min-height:auto; }
+  .section-wrap { padding:0 20px; }
+  section { padding:72px 0; }
+  .nav-links-wrap { display:none; }
+  .solution-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <app-navbar></app-navbar>
+
+  <!-- Hero has its own background -->
+  <div class="hero-section">
+    <!-- animated orbs -->
+    <div class="hero-orb" style="width:700px;height:600px;top:-180px;left:-120px;background:radial-gradient(circle,rgba(37,99,235,.09) 0%,transparent 65%);animation:orbFloat1 16s ease-in-out infinite"></div>
+    <div class="hero-orb" style="width:500px;height:500px;top:80px;right:-80px;background:radial-gradient(circle,rgba(14,165,233,.07) 0%,transparent 65%);animation:orbFloat2 18s ease-in-out infinite"></div>
+    <div class="hero-orb" style="width:400px;height:400px;bottom:-100px;left:40%;background:radial-gradient(circle,rgba(139,92,246,.05) 0%,transparent 65%);animation:orbFloat3 20s ease-in-out infinite"></div>
+    <hero-section></hero-section>
+  </div>
+
+  <div style="background:var(--bg2)">
+    <problem-section></problem-section>
+  </div>
+  <solution-section></solution-section>
+  <div style="background:var(--bg2)">
+    <how-it-works></how-it-works>
+  </div>
+  <benefits-section></benefits-section>
+  <cta-section></cta-section>
+  <app-footer></app-footer>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <circle cx="9" cy="9" r="8" stroke="#2563eb" stroke-width="1.5"/>
+    <path d="M5.5 9l2.5 2.5 4.5-4.5" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  Аккаунт создан — проверьте почту.
+</div>
+
+<script>
+const { createApp, ref, onMounted, onUnmounted } = Vue;
+
+function showToast() {
+  const el = document.getElementById('toast');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+/* ── REGISTER FORM ── */
+const RegisterForm = {
+  setup() {
+    const email = ref(''), password = ref(''), loading = ref(false), done = ref(false);
+    async function submit(e) {
+      e.preventDefault();
+      if (!email.value.includes('@') || password.value.length < 6) return;
+      loading.value = true;
+      await new Promise(r => setTimeout(r, 900));
+      loading.value = false; done.value = true;
+      showToast();
+      setTimeout(() => { done.value = false; email.value = ''; password.value = ''; }, 4000);
+    }
+    return { email, password, loading, done, submit };
+  },
+  template: `
+    <form @submit="submit" style="display:flex;flex-direction:column;gap:10px">
+      <input v-model="email"    type="email"    placeholder="Email"                  class="form-field" :disabled="done||loading" autocomplete="email" />
+      <input v-model="password" type="password" placeholder="Пароль (от 6 символов)" class="form-field" :disabled="done||loading" autocomplete="new-password" />
+      <button type="submit" class="btn-primary" :disabled="done||loading" :style="done?'background:#16a34a':''">
+        <span v-if="loading" style="display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="animation:spin .8s linear infinite">
+            <circle cx="7.5" cy="7.5" r="5.5" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
+            <path d="M7.5 2a5.5 5.5 0 015.5 5.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Создаём аккаунт…
+        </span>
+        <span v-else-if="done">✓ Готово!</span>
+        <span v-else>Начать бесплатно →</span>
+      </button>
+      <p style="font-size:13px;color:#94a3b8;text-align:center;margin-top:2px">
+        Уже есть аккаунт? <a href="/admin/login" style="color:#2563eb;text-decoration:none;font-weight:500">Войти</a>
+      </p>
+    </form>
+  `
+};
+
+/* ── GAZE VIZ — курсор управляет взглядом ── */
+const GazeViz = {
+  setup() {
+    const canvas = ref(null);
+    let raf;
+    let mouseX = -1, mouseY = -1;
+    const onMouse = e => { mouseX = e.clientX; mouseY = e.clientY; };
+
+    onMounted(() => {
+      window.addEventListener('mousemove', onMouse, { passive: false });
+
+      const c = canvas.value;
+      const ctx = c.getContext('2d');
+      const W = c.width  = 560;
+      const H = c.height = 500;
+
+      const BLUE     = '#2563eb';
+      const BLUE_A   = 'rgba(37,99,235,0.6)';
+      const BLUE_DIM = 'rgba(37,99,235,0.1)';
+      const BLACK    = '#0b0e1a';
+      const GRAY     = '#64748b';
+      const GREEN    = '#16a34a';
+      const RED      = '#dc2626';
+
+      let t = 0;
+      // автономные цели (когда курсора нет или он вне зоны)
+      const autoPts = [
+        [W*.5,H*.48],[W*.34,H*.38],[W*.66,H*.38],
+        [W*.5,H*.58],[W*.62,H*.34],[W*.4,H*.62],
+      ];
+      let autoIdx = 0;
+      let gx = W/2, gy = H/2;
+      let theta = 4.2, alpha = 12.8;
+      let attention = true;
+      let prevAttention = true;
+      let statusAlpha = 1; // для плавной смены статуса
+
+      const ease = (a,b,k) => a+(b-a)*k;
+      const clamp = (v,lo,hi) => Math.max(lo,Math.min(hi,v));
+
+      function roundRect(x,y,w,h,r){
+        ctx.beginPath();
+        ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+        ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+        ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+        ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+        ctx.closePath();
+      }
+
+      function draw() {
+        t += 0.012;
+        ctx.clearRect(0,0,W,H);
+
+        // ── фон ──
+        ctx.fillStyle = 'rgba(247,248,252,0.7)';
+        ctx.fillRect(0,0,W,H);
+
+        // ── сетка ──
+        ctx.strokeStyle = 'rgba(37,99,235,0.05)';
+        ctx.lineWidth = 1;
+        for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+        for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+        // ── определяем цель взгляда ──
+        const rect = c.getBoundingClientRect();
+        const hasRealMouse = mouseX >= 0;
+        let targetX, targetY, isOnScreen;
+
+        if (hasRealMouse) {
+          // масштабируем экранные координаты в координаты канваса
+          targetX = (mouseX - rect.left) * (W / rect.width);
+          targetY = (mouseY - rect.top)  * (H / rect.height);
+          // «на экране» = курсор в пределах канваса (с небольшим отступом)
+          isOnScreen = mouseX >= rect.left - 40 && mouseX <= rect.right  + 40
+                    && mouseY >= rect.top  - 40 && mouseY <= rect.bottom + 40;
+        } else {
+          // автономный режим пока курсор не двигался
+          const [ax,ay] = autoPts[autoIdx];
+          targetX = ax; targetY = ay;
+          if(Math.hypot(gx-ax,gy-ay)<4) autoIdx=(autoIdx+1)%autoPts.length;
+          isOnScreen = true;
+        }
+
+        // плавное перемещение взгляда
+        const speed = hasRealMouse ? 0.12 : 0.022;
+        gx = ease(gx, clamp(targetX,10,W-10), speed);
+        gy = ease(gy, clamp(targetY,10,H-10), speed);
+
+        // обновляем углы с небольшим дрейфом
+        theta = +(theta + (Math.random()-.5)*.06).toFixed(1);
+        alpha = +(alpha + (Math.random()-.5)*.08).toFixed(1);
+
+        // плавная смена статуса
+        if (isOnScreen !== prevAttention || !hasRealMouse) {
+          if(hasRealMouse) prevAttention = isOnScreen;
+          attention = isOnScreen;
+        }
+
+        const fx=W/2, fy=H/2-10, fw=210, fh=260;
+
+        // ── бокс детекции лица ──
+        ctx.strokeStyle = BLUE; ctx.lineWidth = 1.5;
+        const cn = 24;
+        [[fx-fw/2,fy-fh/2],[fx+fw/2,fy-fh/2],[fx+fw/2,fy+fh/2],[fx-fw/2,fy+fh/2]].forEach(([cx2,cy2],i)=>{
+          const sx=i===1||i===2?-1:1, sy=i>=2?-1:1;
+          ctx.beginPath(); ctx.moveTo(cx2,cy2+sy*cn); ctx.lineTo(cx2,cy2); ctx.lineTo(cx2+sx*cn,cy2); ctx.stroke();
+        });
+        ctx.fillStyle = BLUE; ctx.font = '500 10px Inter, sans-serif';
+        ctx.fillText('ЛИЦО ОБНАРУЖЕНО', fx-fw/2+4, fy-fh/2-7);
+
+        // ── линия сканирования ──
+        const sl = ((t*55)%(fh+20))-10+fy-fh/2;
+        const sg = ctx.createLinearGradient(fx-fw/2,sl,fx+fw/2,sl);
+        sg.addColorStop(0,'rgba(37,99,235,0)'); sg.addColorStop(.5,'rgba(37,99,235,.35)'); sg.addColorStop(1,'rgba(37,99,235,0)');
+        ctx.strokeStyle=sg; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(fx-fw/2,sl); ctx.lineTo(fx+fw/2,sl); ctx.stroke();
+
+        // ── точки-ориентиры ──
+        const lm=[[fx-55,fy-65],[fx+55,fy-65],[fx,fy-5],[fx-32,fy+65],[fx+32,fy+65],[fx,fy+86],[fx-85,fy-40],[fx+85,fy-40]];
+        ctx.fillStyle='rgba(37,99,235,0.65)';
+        lm.forEach(([lx,ly])=>{ctx.beginPath();ctx.arc(lx,ly,2.2,0,Math.PI*2);ctx.fill();});
+
+        // ── глаза ──
+        [[fx-55,fy-65],[fx+55,fy-65]].forEach(([ex,ey])=>{
+          ctx.strokeStyle=BLUE; ctx.lineWidth=1.5;
+          ctx.beginPath(); ctx.ellipse(ex,ey,24,11,0,0,Math.PI*2); ctx.stroke();
+          ctx.strokeStyle='rgba(37,99,235,.45)'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.arc(ex,ey,9,0,Math.PI*2); ctx.stroke();
+          ctx.fillStyle=BLUE; ctx.beginPath(); ctx.arc(ex,ey,3.5,0,Math.PI*2); ctx.fill();
+        });
+
+        // ── вектор взгляда ──
+        const emx=fx, emy=fy-65;
+        ctx.strokeStyle=BLUE_A; ctx.lineWidth=2; ctx.setLineDash([5,6]);
+        ctx.beginPath(); ctx.moveTo(emx,emy); ctx.lineTo(gx,gy); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // стрелка
+        const ang = Math.atan2(gy-emy,gx-emx);
+        ctx.fillStyle=BLUE_A;
+        ctx.beginPath();
+        ctx.moveTo(gx,gy);
+        ctx.lineTo(gx-10*Math.cos(ang-.4),gy-10*Math.sin(ang-.4));
+        ctx.lineTo(gx-10*Math.cos(ang+.4),gy-10*Math.sin(ang+.4));
+        ctx.closePath(); ctx.fill();
+
+        // точка цели
+        ctx.fillStyle=BLUE_DIM; ctx.beginPath(); ctx.arc(gx,gy,16,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=BLUE;     ctx.beginPath(); ctx.arc(gx,gy,4.5,0,Math.PI*2); ctx.fill();
+
+        // ── оси положения головы ──
+        const hx=fx+84, hy=fy-18;
+        [{dx:1,dy:-.1,c:'rgba(220,38,38,.7)',l:'X'},{dx:0,dy:-1,c:'rgba(22,163,74,.7)',l:'Y'},{dx:.15,dy:.5,c:'rgba(37,99,235,.7)',l:'Z'}]
+          .forEach(({dx,dy,c,l})=>{
+            ctx.strokeStyle=c; ctx.lineWidth=1.5;
+            ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx+dx*30,hy+dy*30); ctx.stroke();
+            ctx.fillStyle=c; ctx.font='9px Inter'; ctx.fillText(l,hx+dx*35,hy+dy*35+3);
+          });
+
+        // ── пульсирующие кольца ──
+        [64,105,148].forEach((r,i)=>{
+          const a=(Math.sin(t*.7+i*1.2)*.5+.5)*.07+.015;
+          ctx.strokeStyle=`rgba(37,99,235,${a})`; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.arc(W/2,H/2-10,r,0,Math.PI*2); ctx.stroke();
+        });
+
+        // ── карточка статуса (топ-правый угол) ──
+        const statusColor = attention ? GREEN : RED;
+        const statusText  = attention ? 'ФОКУС' : 'ОТВЛЕЧЕНИЕ';
+        const statusSub   = attention ? '↑ В ФОКУСЕ' : '↓ ОТВЛЕЧЁН';
+        const cardW = attention ? 110 : 150;
+
+        roundRect(W-cardW-14, 14, cardW, 78, 10);
+        ctx.fillStyle='rgba(255,255,255,0.96)'; ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=1; ctx.stroke();
+
+        // статус-точка
+        const dotX = W-cardW-14+16, dotY = 14+20;
+        const dotA = .5+.5*Math.sin(t*3);
+        ctx.fillStyle = statusColor.replace(')',`, ${dotA})`).replace('rgb','rgba');
+        ctx.beginPath(); ctx.arc(dotX,dotY,4,0,Math.PI*2); ctx.fill();
+
+        ctx.fillStyle=GRAY; ctx.font='600 9px Inter'; ctx.fillText('СТАТУС', W-cardW-14+26, 14+24);
+
+        // большой текст статуса
+        ctx.fillStyle=statusColor;
+        const fontSize = attention ? 22 : 16;
+        ctx.font=`800 ${fontSize}px Inter`;
+        ctx.fillText(statusText, W-cardW-14+10, 14+50);
+
+        ctx.fillStyle=statusColor; ctx.font='600 9px Inter';
+        ctx.fillText(statusSub, W-cardW-14+10, 14+68);
+
+        // ── карточка углов (низ-лево) ──
+        roundRect(12, H-78, 148, 64, 10);
+        ctx.fillStyle='rgba(255,255,255,0.96)'; ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.07)'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle=GRAY;  ctx.font='600 9px Inter';  ctx.fillText('ПОВОРОТ ГОЛОВЫ', 24, H-56);
+        ctx.fillStyle=BLACK; ctx.font='600 11px Inter'; ctx.fillText('θ '+theta.toFixed(1)+'°  α '+alpha.toFixed(1)+'°', 24, H-38);
+        ctx.fillStyle=BLUE;  ctx.font='600 9px Inter';  ctx.fillText('ВЗГЛЯД · ЗАФИКСИРОВАН', 24, H-20);
+
+        raf = requestAnimationFrame(draw);
+      }
+
+      draw();
+    });
+
+    onUnmounted(() => { cancelAnimationFrame(raf); window.removeEventListener('mousemove', onMouse); });
+    return { canvas };
+  },
+  template: `
+    <canvas ref="canvas"
+      style="max-width:100%;height:auto;border-radius:20px;
+             box-shadow:0 8px 48px rgba(37,99,235,.1),0 2px 12px rgba(0,0,0,.07)">
+    </canvas>
+  `
+};
+
+/* ── NAVBAR ── */
+const AppNavbar = {
+  setup() {
+    const scrolled = ref(false);
+    const onScroll = () => { scrolled.value = window.scrollY > 40; };
+    onMounted(()   => window.addEventListener('scroll', onScroll, { passive:true }));
+    onUnmounted(() => window.removeEventListener('scroll', onScroll));
+    return { scrolled };
+  },
+  template: `
+    <nav :class="{ scrolled }">
+      <a href="#" style="text-decoration:none;display:inline-flex;align-items:center">
+        <img src="logo.png" alt="ФОКУС"
+          style="height:40px;width:auto;max-width:150px;object-fit:contain;display:block" />
+      </a>
+      <div class="nav-links-wrap" style="display:flex;align-items:center;gap:32px">
+        <a href="#problem" class="nav-link">Проблема</a>
+        <a href="#solution" class="nav-link">Решение</a>
+        <a href="#how"      class="nav-link">Как работает</a>
+      </div>
+      <a href="#register" class="nav-cta">Попробовать</a>
+    </nav>
+  `
+};
+
+/* ── HERO ── */
+const HeroSection = {
+  components: { RegisterForm, GazeViz },
+  template: `
+    <div class="hero-inner">
+      <!-- левая колонка -->
+      <div style="animation:fadeUp .8s ease both">
+        <div class="hero-badge"><div class="hero-badge-dot"></div>Новая метрика продуктивности</div>
+        <h1 class="hero-h1">Секрет фокуса —<br><span class="accent">контроль внимания.</span></h1>
+        <p style="font-size:17px;color:#64748b;line-height:1.75;max-width:420px;margin-bottom:40px">
+          Вы не знаете, сколько времени реально работаете.<br>Теперь — знаете.
+        </p>
+        <div style="max-width:360px" id="register">
+          <register-form></register-form>
+        </div>
+        <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:16px">
+          <span v-for="h in hints" :key="h" style="font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:5px">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="5" stroke="#94a3b8" stroke-width="1.2"/>
+              <path d="M4 6l1.5 1.5L8 4" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ h }}
+          </span>
+        </div>
+      </div>
+
+      <!-- правая колонка — холст взгляда -->
+      <div style="display:flex;align-items:center;justify-content:center;animation:fadeUp 1s ease .25s both;opacity:0">
+        <gaze-viz></gaze-viz>
+      </div>
+    </div>
+  `,
+  data: () => ({ hints: ['Бесплатный план', 'Без карты', 'Отмена в любой момент'] })
+};
+
+/* ── PROBLEM ── */
+const ProblemSection = {
+  template: `
+    <section id="problem">
+      <div class="section-wrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start">
+          <div>
+            <div class="section-eyebrow reveal">Звучит знакомо?</div>
+            <h2 class="section-h2 reveal" style="margin-bottom:16px">Ты думаешь,<br>что работаешь.</h2>
+            <p class="reveal" style="font-size:16px;color:#64748b;line-height:1.75;max-width:360px;margin-bottom:48px">
+              Каждый день ты садишься за задачу — и теряешь её. Не потому что ленив. Потому что нет инструмента.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px">
+              <div v-for="(s,i) in stats" :key="i" class="reveal" :class="'reveal-d'+(i+1)">
+                <div class="stat-number">{{ s.n }}<span class="stat-unit">{{ s.u }}</span></div>
+                <div class="stat-label">{{ s.l }}</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div v-for="(sc,i) in scenarios" :key="i"
+              class="problem-scenario reveal" :class="'reveal-d'+(i+1)"
+              :style="sc.danger?'border-color:rgba(220,38,38,0.15)':''">
+              <div class="problem-time" :style="sc.danger?'color:#dc2626':''">{{ sc.time }}</div>
+              <div class="problem-text" v-html="sc.text"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `,
+  data: () => ({
+    stats: [
+      {n:'5', u:'мин',l:'до первого\nотвлечения'},
+      {n:'23',u:'мин',l:'чтобы снова\nвойти в поток'},
+      {n:'40',u:'%',  l:'рабочего дня\nуходит впустую'},
+    ],
+    scenarios: [
+      {time:'10:02',text:'Открываешь задачу. Настраиваешься.'},
+      {time:'10:03',text:'<span class="strike">Начинаешь работать</span> → Отвлекаешься на уведомление'},
+      {time:'10:24',text:'Возвращаешься. Забыл, с чего начал.'},
+      {time:'повтор',text:'<span style="color:#94a3b8">×12 в день. Каждый день.</span>',danger:true},
+    ]
+  })
+};
+
+/* ── SOLUTION ── */
+const SolutionSection = {
+  template: `
+    <section id="solution">
+      <div class="section-wrap">
+        <div style="text-align:center;max-width:640px;margin:0 auto 64px">
+          <div class="section-eyebrow reveal">Решение</div>
+          <h2 class="section-h2 reveal" style="margin-bottom:18px">Мы сделали внимание<br><span style="color:#2563eb">измеримым.</span></h2>
+          <p class="reveal" style="font-size:16px;color:#64748b;line-height:1.75">
+            ФОКУС анализирует взгляд и положение головы в реальном времени. Никаких браслетов — только камера ноутбука и честный ответ:
+            <em style="color:#0b0e1a;font-style:normal;font-weight:600">ты сейчас здесь?</em>
+          </p>
+        </div>
+        <div class="solution-grid">
+          <div v-for="(c,i) in cards" :key="i" class="solution-cell reveal" :class="'reveal-d'+i">
+            <div style="width:44px;height:44px;margin-bottom:22px;color:#2563eb" v-html="c.icon"></div>
+            <div style="font-size:17px;font-weight:700;margin-bottom:10px">{{ c.title }}</div>
+            <div style="font-size:14px;color:#64748b;line-height:1.65">{{ c.desc }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `,
+  data: () => ({
+    cards: [
+      {icon:`<svg viewBox="0 0 44 44" fill="none" width="44" height="44"><ellipse cx="22" cy="22" rx="18" ry="10" stroke="currentColor" stroke-width="1.5"/><circle cx="22" cy="22" r="6" stroke="currentColor" stroke-width="1.5" opacity=".6"/><circle cx="22" cy="22" r="2.5" fill="currentColor"/></svg>`,title:'Оценка взгляда',desc:'3D-вектор взгляда с точностью до 2.5°. ResNet-backbone, обученный на 80 000+ примерах.'},
+      {icon:`<svg viewBox="0 0 44 44" fill="none" width="44" height="44"><rect x="10" y="6" width="24" height="28" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M16 18l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,title:'Положение головы',desc:'cv2.solvePnP определяет наклон и поворот головы в реальном времени. Учитывает движение, не только взгляд.'},
+      {icon:`<svg viewBox="0 0 44 44" fill="none" width="44" height="44"><path d="M8 32L16 20l8 6 8-14 8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="14" r="3" fill="currentColor"/></svg>`,title:'Оценка внимания',desc:'Конус внимания ±25°. Результат — ФОКУС / ОТВЛЕЧЕНИЕ + числовые метрики. Кеш в Redis, TTL 2 часа.'},
+    ]
+  })
+};
+
+/* ── HOW IT WORKS ── */
+const HowItWorks = {
+  template: `
+    <section id="how">
+      <div class="section-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:24px;margin-bottom:56px">
+          <div>
+            <div class="section-eyebrow reveal">Как это работает</div>
+            <h2 class="section-h2 reveal">5 шагов от кадра<br>до решения.</h2>
+          </div>
+          <p class="reveal" style="font-size:14px;color:#94a3b8;max-width:280px;line-height:1.7">30 кадров/с · каждый кадр — полный цикл · результат за &lt;35 мс</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:36px">
+          <div v-for="(s,i) in steps" :key="i" class="step-card reveal" :class="'reveal-d'+(i%4+1)">
+            <div class="step-num">{{ String(i+1).padStart(2,'0') }}</div>
+            <div class="step-title">{{ s.title }}</div>
+            <div class="step-desc">{{ s.desc }}</div>
+          </div>
+        </div>
+        <div class="reveal" style="padding:24px 28px;background:#fff;border:1px solid rgba(37,99,235,.12);border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#2563eb;margin-bottom:12px">Стек</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span v-for="t in tech" :key="t" style="font-size:12px;font-weight:500;color:#374151;background:#f1f5f9;border:1px solid rgba(0,0,0,.07);border-radius:6px;padding:4px 12px">{{ t }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  `,
+  data: () => ({
+    steps: [
+      {title:'Захват',       desc:'JPEG со встроенной камеры, 30 кадров/с по WebSocket.'},
+      {title:'Сетка лица',   desc:'MediaPipe: 468 ориентиров, 14 ключевых для глаз.'},
+      {title:'Нейросеть',    desc:'ResNet, кроп 55×35 пк. Выход — вектор (x, y, z) взгляда.'},
+      {title:'Поза головы',  desc:'cv2.solvePnP по 6 точкам → матрица R, углы наклона.'},
+      {title:'Решение',      desc:'Угол взгляда < 25° + запас 10° → внимание = ФОКУС.'},
+    ],
+    tech:['Python 3.11','FastAPI','PyTorch','MediaPipe 0.10','OpenCV','WebSocket','Redis','Go relay','NestJS']
+  })
+};
+
+/* ── BENEFITS ── */
+const BenefitsSection = {
+  template: `
+    <section id="benefits">
+      <div class="section-wrap">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:96px;align-items:start">
+          <div>
+            <div class="section-eyebrow reveal">Преимущества</div>
+            <h2 class="section-h2 reveal" style="margin-bottom:44px">Ничего<br>лишнего.</h2>
+            <div>
+              <div v-for="(b,i) in benefits" :key="i" class="benefit-row reveal" :class="'reveal-d'+(i+1)">
+                <div class="benefit-icon" v-html="b.icon"></div>
+                <div>
+                  <div style="font-size:15px;font-weight:700;margin-bottom:4px">{{ b.title }}</div>
+                  <div style="font-size:13px;color:#64748b;line-height:1.6">{{ b.desc }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div v-for="(u,i) in usecases" :key="i" class="reveal" :class="'reveal-d'+(i+1)"
+              style="padding:26px 28px;background:#fff;border:1px solid rgba(0,0,0,.07);border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .2s,transform .2s;cursor:default"
+              onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,.1)';this.style.transform='translateY(-2px)'"
+              onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,.05)';this.style.transform=''">
+              <div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#2563eb;margin-bottom:8px">{{ u.tag }}</div>
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px">{{ u.title }}</div>
+              <div style="font-size:13px;color:#64748b;line-height:1.6">{{ u.desc }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  `,
+  data: () => ({
+    benefits: [
+      {icon:`<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="9" r="2" fill="currentColor"/></svg>`,title:'Только камера',desc:'Никакого специального оборудования. Работает прямо сейчас с любым ноутбуком.'},
+      {icon:`<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 14l4-6 4 3 5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,title:'Реальное время',desc:'Латентность < 35 мс. Показатель обновляется на каждый кадр.'},
+      {icon:`<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="7" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,title:'Приватность',desc:'Видеопоток не покидает устройство. Модель работает локально.'},
+      {icon:`<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v4M9 12v4M2 9h4M12 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="3" stroke="currentColor" stroke-width="1.5"/></svg>`,title:'Устойчив к шуму',desc:'EMA-сглаживание + запас 10°. Нет ложных срабатываний при моргании.'},
+    ],
+    usecases: [
+      {tag:'Образование',    title:'Онлайн-обучение',      desc:'Понять, когда студент реально слушает, а когда нет.'},
+      {tag:'Продуктивность', title:'Глубокая работа',       desc:'Объективные данные о качестве рабочих сессий.'},
+      {tag:'UX-исследования',title:'Анализ интерфейсов',    desc:'Куда смотрят пользователи? Что привлекает внимание?'},
+      {tag:'Будущее',        title:'Адаптивные интерфейсы', desc:'Система знает, что вы видите — и реагирует на это.'},
+    ]
+  })
+};
+
+/* ── CTA ── */
+const CtaSection = {
+  components: { RegisterForm },
+  template: `
+    <section class="cta-dark">
+      <div class="cta-glow"></div>
+      <div class="section-wrap" style="position:relative;z-index:1;padding-top:120px;padding-bottom:120px;text-align:center">
+        <div class="reveal">
+          <div style="display:flex;justify-content:center;margin-bottom:28px">
+            <img src="logo.png" alt="ФОКУС" style="height:52px;width:auto;max-width:200px;object-fit:contain" />
+          </div>
+          <h2 style="font-size:clamp(40px,5vw,68px);font-weight:900;letter-spacing:-.04em;line-height:1.04;margin-bottom:18px;color:#fff">
+            Начни контролировать<br><span style="color:#60a5fa">своё внимание.</span>
+          </h2>
+          <p style="font-size:17px;color:#64748b;max-width:440px;margin:0 auto 44px;line-height:1.75">
+            Зарегистрируйся и уже сегодня увидишь, сколько времени ты реально работаешь.
+          </p>
+          <div style="max-width:360px;margin:0 auto">
+            <register-form></register-form>
+          </div>
+        </div>
+      </div>
+    </section>
+  `
+};
+
+/* ── FOOTER ── */
+const AppFooter = {
+  template: `
+    <footer style="background:#fff;border-top:1px solid rgba(0,0,0,.07);padding:36px 52px">
+      <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+        <img src="logo.png" alt="ФОКУС" style="height:32px;width:auto;max-width:120px;object-fit:contain" />
+        <div style="display:flex;gap:24px">
+          <a href="#" style="font-size:13px;color:#94a3b8;text-decoration:none" onmouseover="this.style.color='#64748b'" onmouseout="this.style.color='#94a3b8'">Конфиденциальность</a>
+          <a href="/admin/login" style="font-size:13px;color:#94a3b8;text-decoration:none" onmouseover="this.style.color='#64748b'" onmouseout="this.style.color='#94a3b8'">Войти</a>
+          <a href="#" style="font-size:13px;color:#94a3b8;text-decoration:none" onmouseover="this.style.color='#64748b'" onmouseout="this.style.color='#94a3b8'">GitHub</a>
+        </div>
+        <div style="font-size:13px;color:#cbd5e1">© 2026 ФОКУС</div>
+      </div>
+    </footer>
+  `
+};
+
+/* ── APP ── */
+createApp({
+  components:{ AppNavbar, HeroSection, ProblemSection, SolutionSection, HowItWorks, BenefitsSection, CtaSection, AppFooter },
+  setup() {
+    onMounted(() => {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+      }, { threshold:.08 });
+      setTimeout(() => document.querySelectorAll('.reveal').forEach(el => obs.observe(el)), 150);
+    });
+  }
+}).mount('#app');
+</script>
+<style>
+@keyframes spin { to { transform:rotate(360deg); } }
+#hero, .hero-section section { border:none !important; }
+.cta-dark .form-field { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.12); color:#fff; }
+.cta-dark .form-field::placeholder { color:#475569; }
+.cta-dark .form-field:focus { border-color:rgba(96,165,250,.5); background:rgba(255,255,255,.1); box-shadow:0 0 0 3px rgba(96,165,250,.12); }
+.cta-dark p a { color:#60a5fa !important; }
+</style>
+</body>
+</html>
