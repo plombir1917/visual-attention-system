@@ -1,10 +1,10 @@
 fastapi[standard]
 uvicorn
 websockets
-opencv-python
-mediapipe
+opencv-python-headless
+mediapipe==0.10.14
 torch
-numpy
+numpy<2.0
 h5py
 tqdm
 

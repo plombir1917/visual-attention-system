@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Any, Dict
 
 import cv2
@@ -11,7 +12,7 @@ from core.attention_pipeline import AttentionPipeline
 app = FastAPI()
 
 # Инициализируем пайплайн один раз на процесс
-pipeline = AttentionPipeline("checkpoints/best_model.pt")
+pipeline = AttentionPipeline(os.getenv("MODEL_PATH", "src/checkpoints/best_model.pt"))
 
 
 def _decode_jpeg_bytes_to_bgr(data: bytes) -> np.ndarray:
