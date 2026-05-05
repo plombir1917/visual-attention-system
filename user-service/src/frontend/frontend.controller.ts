@@ -14,7 +14,7 @@ export class FrontendController {
     if (BOT_PATTERN.test(ua)) {
       res.type('html').send(getBotHtml());
     } else {
-      res.sendFile(join(process.cwd(), 'src/frontend/public/index.html'));
+      res.sendFile(join(__dirname, '/public/index.html'));
     }
   }
 }
