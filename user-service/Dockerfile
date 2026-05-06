@@ -7,6 +7,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+RUN npm run generate
 RUN npm run build
 
 # стейдж прода
@@ -18,8 +20,17 @@ COPY package*.json ./
 
 RUN npm ci --omit=dev
 
+# скомпилированные файлы и необходимые ресурсы
 COPY --from=builder /app/dist ./dist
+
+# статика для фронтенда и админки
+COPY --from=builder /app/src/frontend/public ./dist/src/frontend/public
+COPY --from=builder /app/src/admin/components/ ./src/admin/components/
+
+# копируем папку prisma, т.к. файл со схемой не компилируется и генерируем клиент
+COPY --from=builder /app/prisma/ ./prisma
+RUN npx prisma generate
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
