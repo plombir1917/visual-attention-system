@@ -7,6 +7,21 @@ services:
 #######################################################
   redis: 
     image: redis:8.2.5-bookworm
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 #######################################################
   postgres: 
     image: postgres:16.13-bookworm
@@ -16,6 +31,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
     # Смотри volumes внизу файла
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -30,6 +47,9 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       SECRET: ${SECRET}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
     build: 
       context: ./user-service
     ports:
@@ -38,6 +58,8 @@ services:
 
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
     healthcheck:
@@ -61,3 +83,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
