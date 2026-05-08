@@ -39,7 +39,7 @@ export class UserOptions {
           after: [hidePassword, hideAPKey],
         },
         show: {
-          after: [hidePassword, hideAPKey],
+          after: [hidePassword],
         },
         bulkDelete: {
           isVisible: false,
