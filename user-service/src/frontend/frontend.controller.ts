@@ -1,20 +1,33 @@
-import { Controller, Get, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { join } from 'path';
 import { getBotHtml } from './bot-render';
+import { UserDTO } from '../admin/options/resources/options/user/user.dto';
+import { FrontendService } from './frontend.service';
 
 const BOT_PATTERN =
   /googlebot|yandexbot|bingbot|duckduckbot|slurp|baiduspider|applebot|facebot/i;
 
 @Controller()
 export class FrontendController {
+  constructor(private readonly frontendService: FrontendService) {}
+
   @Get('/')
   getLandingPage(@Req() req: Request, @Res() res: Response): void {
     const ua = req.headers['user-agent'] ?? '';
     if (BOT_PATTERN.test(ua)) {
       res.type('html').send(getBotHtml());
     } else {
-      res.sendFile(join(__dirname, '/public/index.html'));
+      res.sendFile(join(__dirname, 'public/index.html'));
     }
+  }
+
+  @Post('/register')
+  async register(@Body() user: UserDTO) {
+    return await this.frontendService.registerUser(
+      user.email,
+      user.name,
+      user.password,
+    );
   }
 }

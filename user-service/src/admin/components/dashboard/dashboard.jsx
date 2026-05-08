@@ -17,16 +17,7 @@ export default function Dashboard() {
     let mounted = true;
     (async () => {
       try {
-        const res = await api.getDashboard();
-        if (mounted) {
-          const payload = res?.data || {};
-          setData({
-            usersCount: Number(payload.usersCount) || 0,
-            resourcesCount: Number(payload.resourcesCount) || 0,
-            adminJSVersion: payload.adminJSVersion || '',
-          });
           setLoading(false);
-        }
       } catch (e) {
         if (mounted) {
           setError('Не удалось загрузить данные дашборда');

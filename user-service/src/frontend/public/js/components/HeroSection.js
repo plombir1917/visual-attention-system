@@ -1,9 +1,13 @@
-import { RegisterForm } from './RegisterForm.js';
-import { GazeViz }      from './GazeViz.js';
+import { GazeViz } from './GazeViz.js';
 
 export const HeroSection = {
-  components: { RegisterForm, GazeViz },
+  components: { GazeViz },
   data: () => ({ hints: ['Бесплатный план', 'Без карты', 'Отмена в любой момент'] }),
+  methods: {
+    scrollToForm() {
+      document.getElementById('cta')?.scrollIntoView({ behavior: 'smooth' });
+    },
+  },
   template: `
     <div class="hero-inner">
       <div style="animation:fadeUp .8s ease both">
@@ -12,8 +16,11 @@ export const HeroSection = {
         <p class="hero-para">
           Вы не знаете, сколько времени реально работаете.<br>Теперь — знаете.
         </p>
-        <div style="max-width:360px" id="register">
-          <register-form></register-form>
+        <div style="max-width:360px">
+          <button type="button" class="btn-primary" @click="scrollToForm">Начать бесплатно →</button>
+          <p style="font-size:13px;color:#94a3b8;text-align:center;margin-top:10px">
+            Уже есть аккаунт? <a href="/admin/login" style="color:#2563eb;text-decoration:none;font-weight:500">Войти</a>
+          </p>
         </div>
         <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:16px">
           <span v-for="h in hints" :key="h" style="font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:5px">

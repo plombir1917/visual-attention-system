@@ -6,3 +6,21 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model user {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  key_hash   String?
+  created_at DateTime @default(now())
+}
+
+model attention {
+  id         String   @id @default(uuid())
+  focus      Boolean
+  teta       Float
+  alpha      Float
+  distance   Float
+  created_at DateTime @default(now())
+}

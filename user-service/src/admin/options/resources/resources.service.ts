@@ -24,9 +24,7 @@ export class ResourceService {
    * Ресурс - сущность программы из БД
    */
   private resources(): resource[] {
-    return [
-      // { model: Prisma.ModelName.user, options: this.userOptions.get() }
-    ];
+    return [{ model: Prisma.ModelName.user, options: this.userOptions.get() }];
   }
 
   getResourcesWithOptions() {

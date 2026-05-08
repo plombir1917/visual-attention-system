@@ -13,7 +13,7 @@ export class AuthService {
       // if (user && (await comparePassword(rawPassword, user.password))) {
       //   return { email: user.email, role: user.role };
       // }
-      return null;
+      return { email, rawPassword };
     } catch (error) {
       throw new UnauthorizedException(error);
     }

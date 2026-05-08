@@ -1,7 +1,6 @@
 import {
   IsEmail,
   IsNotEmpty,
-  IsOptional,
   IsString,
   IsStrongPassword,
   MinLength,
@@ -9,7 +8,7 @@ import {
 import { validateRequest } from '../../../../../utils/validate.js';
 import { ActionRequest } from 'adminjs';
 
-class UserDto {
+export class UserDTO {
   @IsEmail(
     {},
     {
@@ -27,11 +26,8 @@ class UserDto {
 
   @IsStrongPassword({}, { message: 'Недостаточно сложный пароль.' })
   password: string;
-
-  @IsOptional()
-  role?: any;
 }
 
 export const validateUser = async (request: ActionRequest) => {
-  return await validateRequest(request, UserDto);
+  return await validateRequest(request, UserDTO);
 };

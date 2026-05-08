@@ -13,6 +13,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import type { Redis } from 'ioredis';
 import { createSessionOptions } from './auth/session/session-options.js';
 import { setStorage } from './options/storage/storage.js';
+import path from 'path';
 
 @Injectable()
 export class AdminJSService {
@@ -31,6 +32,8 @@ export class AdminJSService {
   initAdminJsConfig() {
     setStorage();
     return {
+      shouldBeInitialized: true,
+
       adminJsOptions: this.getAdminJsOptions(),
       auth: this.getAdminJsAuth(),
       sessionOptions: this.getAdminJsSessionOptions(),
@@ -48,7 +51,8 @@ export class AdminJSService {
       defaultTheme: 'light',
       availableThemes: [customTheme],
       assets: {
-        styles: ['/style.css'],
+        // styles: ['/style.css'],
+        scripts: ['/js/admin-login-prefill.js'],
       },
       dashboard: this.getDashboard(),
       branding: this.getBranding(),

@@ -9,10 +9,7 @@ import { RedisModule as NestRedisModule } from '@nestjs-modules/ioredis';
         options: {
           host: process.env.REDIS_HOST,
           port: Number(process.env.REDIS_PORT),
-          username: process.env.REDIS_USER,
-          password: process.env.REDIS_USER_PASSWORD,
-          db: Number(process.env.REDIS_DB),
-          keyPrefix: process.env.PROJECT_PREFIX + ':',
+          password: process.env.REDIS_PASSWORD,
         },
       }),
     }),

@@ -7,10 +7,5 @@ import { ThemeConfig } from 'adminjs';
 export const customTheme: ThemeConfig = {
   id: 'light',
   name: 'light',
-  overrides: {
-    colors: {
-      primary100: '#8d0b0b',
-    },
-  },
-  stylePath: '.style.css',
+  overrides: {},
 };

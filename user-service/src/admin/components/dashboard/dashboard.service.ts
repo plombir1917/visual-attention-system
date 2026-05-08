@@ -24,7 +24,7 @@ export class DashboardService {
 
   getDashboard(): Dashboard {
     return {
-      // component: Components.Dashboard,
+      component: Components.Dashboard,
       handler: async () => await this.getDashboardMetrics(),
     };
   }

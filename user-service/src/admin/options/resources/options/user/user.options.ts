@@ -13,18 +13,16 @@ export class UserOptions {
     return {
       navigation: { icon: 'User' },
       properties: {
-        role: {
-          isVisible: {
-            edit: true,
-          },
-        },
-        password: {
+        // password: {
+        //   isVisible: false,
+        // },
+        key_hash: {
           isVisible: false,
         },
       },
       actions: {
         new: {
-          isAccessible: false,
+          // isAccessible: false,
           before: [validateUser, hashPassword],
         },
         edit: {
@@ -32,7 +30,7 @@ export class UserOptions {
           before: [validateUser], // нет хеширования, т.к. поле `password` isVisible: false
         },
         delete: {
-          isAccessible: currentUserIsAdmin,
+          // isAccessible: currentUserIsAdmin,
         },
         list: {
           after: [hidePassword],

@@ -4,7 +4,7 @@ export const AppFooter = {
       <div class="footer-inner">
         <img src="logo.png" alt="ФОКУС"
           style="height:48px;width:auto;max-width:180px;object-fit:contain" />
-        <div style="display:flex;gap:24px">
+        <div class="footer-links" style="display:flex;gap:24px">
           <a href="#"           class="footer-link">Конфиденциальность</a>
           <a href="/admin/login" class="footer-link">Войти</a>
           <a href="#"           class="footer-link">GitHub</a>
