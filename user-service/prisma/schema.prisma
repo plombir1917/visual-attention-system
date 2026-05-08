@@ -12,7 +12,7 @@ model user {
   name       String
   email      String   @unique
   password   String
-  key_hash   String?
+  key_hash   String?  @unique
   created_at DateTime @default(now())
 }
 

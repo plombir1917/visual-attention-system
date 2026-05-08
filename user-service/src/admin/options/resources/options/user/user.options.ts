@@ -1,4 +1,4 @@
-import { encodePassword } from '../../../../../utils/bcrypt.js';
+import { hash } from '../../../../../utils/bcrypt.js';
 import {
   ActionRequest,
   ActionResponse,
@@ -13,36 +13,36 @@ export class UserOptions {
     return {
       navigation: { icon: 'User' },
       properties: {
-        // password: {
-        //   isVisible: false,
-        // },
+        password: {
+          isVisible: false,
+        },
         key_hash: {
           isVisible: false,
         },
       },
       actions: {
         new: {
-          // isAccessible: false,
-          before: [validateUser, hashPassword],
+          isVisible: false,
+          // before: [validateUser, hashPassword],
         },
         edit: {
-          isAccessible: currentUserIsAdmin,
-          before: [validateUser], // нет хеширования, т.к. поле `password` isVisible: false
+          isVisible: false,
+          // before: [validateUser], // нет хеширования, т.к. поле `password` isVisible: false
         },
         delete: {
-          // isAccessible: currentUserIsAdmin,
+          isVisible: false,
         },
         list: {
-          after: [hidePassword],
+          after: [hidePassword, hideAPKey],
         },
         search: {
-          after: [hidePassword],
+          after: [hidePassword, hideAPKey],
         },
         show: {
-          after: [hidePassword],
+          after: [hidePassword, hideAPKey],
         },
         bulkDelete: {
-          isAccessible: currentUserIsAdmin,
+          isVisible: false,
         },
       },
     };
@@ -53,7 +53,7 @@ async function hashPassword(context: ActionRequest) {
   if (context?.payload?.password) {
     context.payload = {
       ...context.payload,
-      password: await encodePassword(context.payload.password),
+      password: await hash(context.payload.password),
     };
   }
   return context;
@@ -74,6 +74,26 @@ function hidePassword(response: ActionResponse) {
 function setEmptyPasswordForRecord(record: BaseRecord) {
   if (record?.params?.password) {
     delete record.params.password;
+  }
+
+  return record;
+}
+
+function hideAPKey(response: ActionResponse) {
+  if (response?.records) {
+    response.records?.forEach((record: BaseRecord) => {
+      record = setEmptyAPKeyForRecord(record);
+    });
+  } else if (response?.record?.params) {
+    response.record = setEmptyAPKeyForRecord(response.record);
+  }
+
+  return response;
+}
+
+function setEmptyAPKeyForRecord(record: BaseRecord) {
+  if (record?.params?.key_hash) {
+    delete record.params.key_hash;
   }
 
   return record;

@@ -5,6 +5,7 @@ import { PrismaService } from '../../../../prisma/prisma.service.js';
 import { UserOptions } from './options/user/user.options.js';
 import { FeatureType, ResourceOptions, ResourceWithOptions } from 'adminjs';
 import { ActionsService } from './actions.service.js';
+import { AttentionOptions } from './options/attention/attention.options.js';
 
 export interface resource {
   model?: Prisma.ModelName;
@@ -18,13 +19,23 @@ export class ResourceService {
     private readonly prismaService: PrismaService,
     private readonly actionsService: ActionsService,
     private readonly userOptions: UserOptions,
+    private readonly attentionOptions: AttentionOptions,
   ) {}
 
   /**
    * Ресурс - сущность программы из БД
    */
   private resources(): resource[] {
-    return [{ model: Prisma.ModelName.user, options: this.userOptions.get() }];
+    return [
+      {
+        model: Prisma.ModelName.user,
+        options: this.userOptions.get(),
+      },
+      {
+        model: Prisma.ModelName.attention,
+        options: this.attentionOptions.get(),
+      },
+    ];
   }
 
   getResourcesWithOptions() {

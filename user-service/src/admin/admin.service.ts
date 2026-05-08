@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DashboardService } from './components/dashboard/dashboard.service.js';
 import { AuthService } from './auth/auth.service.js';
 import { AdminJSOptions, Locale } from 'adminjs';
-import { componentLoader } from './components/components.config.js';
+import { componentLoader, Components } from './components/components.config.js';
 import { customTheme } from './options/themes/custom.theme.js';
 import { SessionOptions } from 'express-session';
 import { ResourceService } from './options/resources/resources.service.js';
@@ -55,6 +55,7 @@ export class AdminJSService {
         scripts: ['/js/admin-login-prefill.js'],
       },
       dashboard: this.getDashboard(),
+      pages: this.getPages(),
       branding: this.getBranding(),
       rootPath: '/admin',
       resources: this.getResources(),
@@ -126,6 +127,19 @@ export class AdminJSService {
       language: 'en',
       translations: {
         en,
+      },
+    };
+  }
+
+  /**
+   * Получить кастомные страницы AdminJS.
+   */
+  getPages() {
+    return {
+      'my-profile': {
+        component: Components.UserProfile,
+        icon: 'User',
+        label: 'Мой профиль',
       },
     };
   }

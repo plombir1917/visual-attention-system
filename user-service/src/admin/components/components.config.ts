@@ -11,4 +11,8 @@ export const Components = {
     'Dashboard',
     path.join(process.cwd(), '/src/admin/components/dashboard/dashboard'),
   ),
+  UserProfile: componentLoader.add(
+    'UserProfile',
+    path.join(process.cwd(), '/src/admin/components/user-profile/user-profile'),
+  ),
 };
