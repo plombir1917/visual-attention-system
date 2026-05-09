@@ -1,5 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { compare, generateAPIKey, hash } from '../../utils/bcrypt.js';
+import {
+  comparePassword,
+  generateAPIKey,
+  hashAPIKey,
+  hashPassword,
+  verifyAPIKey,
+} from '../../utils/crypt.js';
 import { ActionContext } from 'adminjs';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 
@@ -12,7 +18,7 @@ export class AuthService {
       data: {
         email,
         name,
-        password: await hash(password),
+        password: await hashPassword(password),
       },
     });
 
@@ -24,7 +30,7 @@ export class AuthService {
       const user = await this.prismaService.user.findUnique({
         where: { email },
       });
-      if (user && (await compare(rawPassword, user.password))) {
+      if (user && (await comparePassword(rawPassword, user.password))) {
         return { id: user.id, email: user.email };
       }
       return null;
@@ -33,29 +39,75 @@ export class AuthService {
     }
   }
 
+  /**
+   * Генерируем API-ключ для пользователя. Если ключ уже есть, то перезаписываем его новым.
+   * @description
+   * API-ключ состоит из двух частей: префикса и секрета.
+   * Префикс нужен для быстрого поиска ключа в базе данных,
+   * а секрет - для проверки его валидности.
+   *
+   * @param userId
+   * @returns rawAPIKey - ключ в открытом виде, который нужно отдать пользователю.
+   * Его нельзя восстановить, поэтому нужно сохранить его сразу после генерации.
+   */
   async generateAPIKey(userId: string) {
-    const APIKey = generateAPIKey(userId);
+    const rawKey = generateAPIKey();
 
-    const hashedAPIKey = await hash(APIKey);
+    const leftPart = rawKey.split('.')[0];
+    const prefix = leftPart.replace('vas_live_', '');
 
-    await this.prismaService.user.update({
-      where: { id: userId },
-      data: { key_hash: hashedAPIKey },
+    const hashedKey = hashAPIKey(rawKey);
+
+    await this.prismaService.api_key.upsert({
+      where: { user_id: userId },
+      update: { prefix, key_hash: hashedKey, created_at: new Date() },
+      create: { user_id: userId, prefix, key_hash: hashedKey },
     });
 
-    return APIKey;
+    return rawKey;
   }
 
-  async authorizeAPIKey(userID: string, rawAPIKey: string) {
-    const user = await this.prismaService.user.findUniqueOrThrow({
-      where: { id: userID },
+  async hasAPIKey(userId: string): Promise<boolean> {
+    const key = await this.prismaService.api_key.findUnique({
+      where: { user_id: userId },
     });
+    return !!key;
+  }
 
-    if (!user.key_hash) {
-      return false;
+  /**
+   * Авторизуем пользователя по API-ключу
+   * @description
+   * Проверяем валидность API-ключа и возвращаем информацию о пользователе
+   *
+   *
+   * @param rawAPIKey - ключ в открытом виде,
+   * который прислал пользователь при запросе.
+   * @returns информацию о пользователе
+   */
+  async authorizeAPIKey(rawAPIKey: string) {
+    // Парсим ключ, чтобы достать из него префикс и найти в базе данных соответствующий ему хэш.
+    const parts = rawAPIKey.split('.');
+    if (parts.length !== 2) {
+      throw new UnauthorizedException('Invalid API key format');
+    }
+    const leftPart = parts[0];
+    const prefix = leftPart.replace('vas_live_', '');
+
+    if (!prefix) {
+      throw new UnauthorizedException('Invalid API key prefix');
     }
 
-    return await compare(rawAPIKey, user.key_hash);
+    const APIKey = await this.prismaService.api_key.findUniqueOrThrow({
+      where: { prefix: prefix },
+      include: { user: true },
+    });
+    const isValid = verifyAPIKey(rawAPIKey, APIKey.key_hash);
+
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid API key');
+    }
+
+    return APIKey.user;
   }
 }
 

@@ -1,4 +1,11 @@
-import { Body, Controller, Injectable, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserDTO } from '../options/resources/options/user/user.dto';
 import { AuthService } from './auth.service';
 
@@ -15,17 +22,12 @@ export class AuthController {
     );
   }
 
-  @Post('/generate-api-key')
-  async generateAPIKey(@Body('userId') userId: string) {
-    return await this.authService.generateAPIKey(userId);
+  @Get('/authorize-api-key')
+  async authorizeAPIKey(@Request() req: Request) {
+    const APIKey = req.headers['x-api-key'];
+    if (!APIKey) {
+      throw new UnauthorizedException('API key is required');
+    }
+    return await this.authService.authorizeAPIKey(APIKey);
   }
-
-  // TODO: integrate with JWT
-  // @Post('/authorize-api-key')
-  // async authorizeAPIKey(
-  //   @Body('userID') userID: string,
-  //   @Body('APIKey') APIKey: string,
-  // ) {
-  //   return await this.authService.authorizeAPIKey(userID, APIKey);
-  // }
 }

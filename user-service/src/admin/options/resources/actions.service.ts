@@ -44,14 +44,15 @@ export class ActionsService {
     const actions = resource.options.actions;
 
     for (const key in actions) {
+      const defaultHandler = this.getDefaultActionHandler(key);
+
+      // кастомные action'ы (не из стандартного набора AdminJS) имеют собственный
+      // handler — не перетираем его
+      if (!defaultHandler) continue;
+
       wrappedResource.options.actions![key] = {
         ...actions[key],
-
-        // если after/before уже заданы, не переопределяем их, а дополняем благодаря тернарнику
-        // before: this.getActionBefore(actions[key]),
-        // after: this.getActionAfter(actions[key]),
-
-        handler: this.setActionHandler(key),
+        handler: this.errorsService.withErrorHandler(defaultHandler),
       };
     }
 
@@ -73,12 +74,6 @@ export class ActionsService {
   //     ? [...action.after, logResponse]
   //     : [logResponse];
   // }
-
-  private setActionHandler(key: string) {
-    const defaultHandler = this.getDefaultActionHandler(key); // инициализируем дефолтный handler, который будем оборачивать
-
-    return this.errorsService.withErrorHandler(defaultHandler);
-  }
 
   private getDefaultActionHandler(key: string) {
     switch (key) {

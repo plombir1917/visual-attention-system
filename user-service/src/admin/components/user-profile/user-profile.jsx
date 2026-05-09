@@ -14,6 +14,7 @@ export default function UserProfile() {
     if (!currentAdmin?.id) return;
 
     setFetching(true);
+
     api
       .recordAction({
         resourceId: 'user',
@@ -23,7 +24,7 @@ export default function UserProfile() {
       .then((response) => {
         const params = response.data?.record?.params ?? null;
         setProfile(params);
-        setHasApiKey(!!params?.key_hash);
+        setHasApiKey(!!params?.has_api_key);
       })
       .catch(() => {})
       .finally(() => setFetching(false));
@@ -124,24 +125,19 @@ function ApiKeyBlock({ userId, hasApiKey, onKeyGenerated }) {
     setConfirmRegen(false);
 
     try {
-      const response = await fetch('/generate-api-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ userId }),
+      const response = await api.recordAction({
+        resourceId: 'user',
+        recordId: userId,
+        actionName: 'generate-api-key',
       });
 
-      if (!response.ok) {
-        throw new Error(`Ошибка сервера: ${response.status}`);
-      }
+      const key = response.data?.generatedKey;
+      if (!key) throw new Error('Ключ не получен от сервера');
 
-      const raw = await response.text();
-      // NestJS may return a JSON-encoded string ("key") or plain text (key)
-      const key = raw.startsWith('"') ? JSON.parse(raw) : raw;
       setGeneratedKey(key);
       onKeyGenerated();
     } catch (e) {
-      setGenError(e.message ?? 'Не удалось сгенерировать ключ');
+      setGenError(e?.message ?? 'Не удалось сгенерировать ключ');
     } finally {
       setGenerating(false);
     }
