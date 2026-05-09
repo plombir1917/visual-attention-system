@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- ══ PRIMARY META ══ -->
+<title>ФОКУС — Контроль внимания в реальном времени</title>
+<meta name="description" content="ФОКУС определяет, смотришь ли ты на экран, в реальном времени: 3D-вектор взгляда, поза головы, оценка внимания за &lt;35 мс. Только камера ноутбука — без браслетов и трекеров." />
+<meta name="keywords" content="контроль внимания, трекинг взгляда, eye tracking, продуктивность, фокус, нейросеть, медиапайп, mediapipe" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://YOUR-DOMAIN-HERE.com/" />
+
+<!-- ══ VERIFICATION — заменить после регистрации в кабинетах ══ -->
+<meta name="yandex-verification" content="YOUR-YANDEX-VERIFICATION-CODE" />
+<meta name="google-site-verification" content="YOUR-GOOGLE-VERIFICATION-CODE" />
+
+<!-- ══ OPEN GRAPH ══ -->
+<meta property="og:type"         content="website" />
+<meta property="og:locale"       content="ru_RU" />
+<meta property="og:site_name"    content="ФОКУС" />
+<meta property="og:title"        content="ФОКУС — Контроль внимания в реальном времени" />
+<meta property="og:description"  content="Система анализирует взгляд и позу головы через камеру ноутбука. Результат — ФОКУС или ОТВЛЕЧЕНИЕ — за &lt;35 мс, без лишнего оборудования." />
+<meta property="og:url"          content="https://YOUR-DOMAIN-HERE.com/" />
+<meta property="og:image"        content="https://YOUR-DOMAIN-HERE.com/og-image.png" />
+<meta property="og:image:width"  content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt"    content="ФОКУС — система контроля внимания" />
+
+<!-- ══ TWITTER CARD ══ -->
+<meta name="twitter:card"        content="summary_large_image" />
+<meta name="twitter:title"       content="ФОКУС — Контроль внимания в реальном времени" />
+<meta name="twitter:description" content="Система анализирует взгляд и позу головы через камеру ноутбука. Результат за &lt;35 мс, без лишнего оборудования." />
+<meta name="twitter:image"       content="https://YOUR-DOMAIN-HERE.com/og-image.png" />
+
+<!-- ══ FAVICON — TODO: сгенерировать набор из logo.png на realfavicongenerator.net ══ -->
+<link rel="icon"             type="image/png" sizes="32x32" href="logo.png" />
+<link rel="icon"             type="image/png" sizes="16x16" href="logo.png" />
+<link rel="apple-touch-icon" sizes="180x180"                href="logo.png" />
+
+<!-- ══ PWA / THEME ══ -->
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#2563eb" />
+
+<!-- ══ PERFORMANCE ══ -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" href="logo.png" as="image" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+<!-- ══ STRUCTURED DATA ══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://YOUR-DOMAIN-HERE.com/#app",
+      "name": "ФОКУС",
+      "alternateName": "Focus Attention System",
+      "description": "Система контроля внимания в реальном времени. Анализирует взгляд и положение головы через камеру ноутбука — без дополнительного оборудования.",
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "ProductivityApplication",
+      "operatingSystem": "Web",
+      "url": "https://YOUR-DOMAIN-HERE.com",
+      "inLanguage": "ru",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "RUB",
+        "availability": "https://schema.org/InStock"
+      },
+      "featureList": [
+        "Определение направления взгляда в реальном времени",
+        "Оценка позы головы через cv2.solvePnP",
+        "Работа только через камеру ноутбука",
+        "Приватность — видеопоток не покидает устройство",
+        "Латентность менее 35 мс"
+      ],
+      "screenshot": "https://YOUR-DOMAIN-HERE.com/og-image.png",
+      "publisher": { "@id": "https://YOUR-DOMAIN-HERE.com/#org" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://YOUR-DOMAIN-HERE.com/#org",
+      "name": "ФОКУС",
+      "url": "https://YOUR-DOMAIN-HERE.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://YOUR-DOMAIN-HERE.com/logo.png",
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://YOUR-DOMAIN-HERE.com/#webpage",
+      "url": "https://YOUR-DOMAIN-HERE.com/",
+      "name": "ФОКУС — Контроль внимания в реальном времени",
+      "description": "ФОКУС определяет, смотришь ли ты на экран, в реальном времени. Только камера ноутбука — без браслетов и трекеров.",
+      "inLanguage": "ru",
+      "isPartOf": { "@id": "https://YOUR-DOMAIN-HERE.com/#app" }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<div id="app">
+  <app-navbar></app-navbar>
+
+  <div class="hero-section">
+    <div class="hero-orb" style="width:700px;height:600px;top:-180px;left:-120px;background:radial-gradient(circle,rgba(37,99,235,.08) 0%,transparent 65%);animation:orbFloat1 16s ease-in-out infinite"></div>
+    <div class="hero-orb" style="width:520px;height:520px;top:60px;right:-80px;background:radial-gradient(circle,rgba(99,102,241,.07) 0%,transparent 65%);animation:orbFloat2 18s ease-in-out infinite"></div>
+    <div class="hero-orb" style="width:420px;height:420px;bottom:-100px;left:38%;background:radial-gradient(circle,rgba(139,92,246,.06) 0%,transparent 65%);animation:orbFloat3 20s ease-in-out infinite"></div>
+    <div aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;display:flex;align-items:center;justify-content:center">
+      <span style="font-size:min(26vw,340px);font-weight:900;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.5px rgba(37,99,235,0.06);user-select:none;white-space:nowrap;line-height:1;margin-top:-.05em">ФОКУС</span>
+    </div>
+    <hero-section></hero-section>
+  </div>
+
+  <div style="background:var(--bg2)">
+    <problem-section></problem-section>
+  </div>
+  <solution-section></solution-section>
+  <div style="background:var(--bg2)">
+    <how-it-works></how-it-works>
+  </div>
+  <benefits-section></benefits-section>
+  <cta-section></cta-section>
+  <app-footer></app-footer>
+</div>
+
+<div class="toast" id="toast">
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <circle cx="9" cy="9" r="8" stroke="#2563eb" stroke-width="1.5"/>
+    <path d="M5.5 9l2.5 2.5 4.5-4.5" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  Аккаунт создан — проверьте почту.
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

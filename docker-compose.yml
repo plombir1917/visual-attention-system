@@ -1,17 +1,86 @@
+name: vas
+
 services:
+#######################################################
   kafka:
     image: bitnami/kafka:latest
+#######################################################
   redis: 
     image: redis:8.2.5-bookworm
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+#######################################################
   postgres: 
     image: postgres:16.13-bookworm
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    # Смотри volumes внизу файла
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+#######################################################
+  user-service: 
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET: ${SECRET}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    build: 
+      context: ./user-service
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+#######################################################
   attention-model:
     build:
       context: ./attention-model
     ports:
       - "8765:8765"
     restart: unless-stopped
+#######################################################
   attention-service:
     image: scratch
+#######################################################
   analytics-service:
     image: scratch
+
+volumes:
+  postgres_data:
+  redis_data:
