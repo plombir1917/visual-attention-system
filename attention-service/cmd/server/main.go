@@ -1,43 +1,87 @@
 package main
 
 import (
-	"attention-service/internal/api"
-	"attention-service/internal/service"
-	"attention-service/storage"
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
-	"time"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"attention-service/internal/api"
+	"attention-service/internal/api/handler"
+	"attention-service/internal/api/middleware"
+	"attention-service/internal/config"
+	"attention-service/internal/infrastructure/modelgrpc"
+	rediscache "attention-service/internal/infrastructure/redis"
+	"attention-service/internal/infrastructure/userhttp"
+	"attention-service/internal/service"
+	"attention-service/pkg/logger"
+
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		os.Stderr.WriteString("load config: " + err.Error() + "\n")
+		os.Exit(1)
+	}
+
+	log := logger.New(cfg.Server.Env)
 	ctx := context.Background()
 
-	cfg := storage.Config{
-		Addr:        "",
-		Password:    "",
-		User:        "",
-		DB:          11,
-		MaxRetries:  10,
-		DialTimeout: time.Second * 10,
-		Timeout:     time.Second * 10,
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Addr,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		log.Error("redis ping failed", "error", err)
+		os.Exit(1)
 	}
+	defer rdb.Close()
 
-	db, err := storage.NewClient(ctx, cfg)
+	sessions := rediscache.NewSessionStore(rdb)
+
+	modelFactory, err := modelgrpc.NewFactory(cfg.Model)
 	if err != nil {
-		panic(err)
+		log.Error("grpc factory init failed", "error", err)
+		os.Exit(1)
+	}
+	defer modelFactory.Close()
+
+	authClient := userhttp.NewClient(cfg.UserService)
+	svc := service.New(sessions, cfg.Redis.TTL, log)
+
+	mux := http.NewServeMux()
+	mux.Handle("/ws", handler.NewWSHandler(svc, modelFactory, authClient, log))
+	mux.HandleFunc("/health", handler.Health)
+
+	chain := middleware.Recovery(log)(middleware.Logging(log)(mux))
+	srv := api.NewServer(cfg.Server, chain)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		log.Info("server started", "port", cfg.Server.Port, "env", cfg.Server.Env)
+		if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {
+			log.Error("server error", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	<-quit
+	log.Info("shutting down gracefully")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Error("shutdown error", "error", err)
+		os.Exit(1)
 	}
 
-	attentionService := service.NewAttentionService(db)
-
-	router := api.NewRouter(attentionService)
-
-	fmt.Println("Server started on 8080")
-
-	err = http.ListenAndServe(":8080", router)
-
-	if err != nil {
-		fmt.Println("ListenAndServe:", err)
-	}
-
+	log.Info("server stopped")
 }

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package attention.v1;
+
+option go_package = "attention-service/pkg/proto/attention/v1;attentionv1";
+
+// AttentionModel processes video frames and returns attention detection results.
+service AttentionModel {
+  // ProcessFrames is a bidirectional streaming RPC:
+  // the client streams JPEG frames, the server streams attention results.
+  rpc ProcessFrames(stream FrameRequest) returns (stream AttentionResponse);
+}
+
+message FrameRequest {
+  bytes data = 1; // raw JPEG bytes
+}
+
+message AttentionResponse {
+  bool   focus        = 1;
+  double theta        = 2;
+  double alpha        = 3;
+  double distance     = 4;
+  repeated double gaze_vector = 5; // [x, y, z]
+}

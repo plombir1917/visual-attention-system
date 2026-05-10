@@ -1,29 +1,27 @@
 name: vas
 
 services:
-#######################################################
+  #######################################################
   kafka:
     image: bitnami/kafka:latest
-#######################################################
-  redis: 
+  #######################################################
+  redis:
     image: redis:8.2.5-bookworm
     restart: unless-stopped
     command: >
-      redis-server
-      --appendonly yes
-      --requirepass ${REDIS_PASSWORD}
+      redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
 
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
-#######################################################
-  postgres: 
+  #######################################################
+  postgres:
     image: postgres:16.13-bookworm
     restart: unless-stopped
 
@@ -38,19 +36,19 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
       interval: 5s
       timeout: 5s
       retries: 5
-#######################################################
-  user-service: 
+  #######################################################
+  user-service:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       SECRET: ${SECRET}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-    build: 
+    build:
       context: ./user-service
     ports:
       - "3000:3000"
@@ -63,21 +61,47 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3000" ]
       interval: 10s
       timeout: 5s
       retries: 5
-#######################################################
+  #######################################################
   attention-model:
     build:
       context: ./attention-model
     ports:
-      - "8765:8765"
+      - "8765:8765"   # WebSocket (local testing)
+      - "50051:50051" # gRPC (used by attention-service)
     restart: unless-stopped
-#######################################################
+    environment:
+      GRPC_PORT: "50051"
+      HTTP_PORT: "8765"
+  #######################################################
   attention-service:
-    image: scratch
-#######################################################
+    build:
+      context: ./attention-service
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      SERVER_ENV: production
+      REDIS_ADDR: ${REDIS_HOST}:${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MODEL_GRPC_ADDR: attention-model:50051
+      USER_SERVICE_BASE_URL: http://user-service:3000
+    depends_on:
+      redis:
+        condition: service_healthy
+      attention-model:
+        condition: service_started
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8080/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    #######################################################
   analytics-service:
     image: scratch
 
