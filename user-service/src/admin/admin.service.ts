@@ -112,8 +112,7 @@ export class AdminJSService {
       companyName: 'ФОКУС | Админ-панель',
       withMadeWithLove: false,
       logo: '/logo.png',
-      // TODO: favicon
-      favicon: '',
+      favicon: '/favicon.ico',
     };
   }
 
