@@ -1,0 +1,25 @@
+appId: com.vas.desktop
+productName: VAS Desktop
+copyright: Copyright © 2025 VAS
+
+directories:
+  buildResources: resources
+  output: release
+
+files:
+  - out/**/*
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: VAS Desktop
