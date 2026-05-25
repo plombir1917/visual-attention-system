@@ -51,11 +51,11 @@
       <!-- active -->
       <template v-else-if="sessionState === 'active'">
         <div class="indicator-wrap">
-          <div class="indicator" :class="latestResult?.focus ? 'focused' : 'unfocused'" />
-          <span class="indicator-label">{{ latestResult?.focus ? 'ФОКУС' : 'ОТВЛЕЧЁН' }}</span>
+          <div class="indicator" :class="!tabVisible ? 'idle' : latestResult?.focus ? 'focused' : 'unfocused'" />
+          <span class="indicator-label">{{ !tabVisible ? 'ВКЛАДКА НЕАКТИВНА' : latestResult?.focus ? 'ФОКУС' : 'ОТВЛЕЧЁН' }}</span>
         </div>
 
-        <div v-if="latestResult" class="metrics">
+        <div v-if="tabVisible && latestResult" class="metrics">
           <div class="metric">
             <span class="metric-label">Угол взгляда θ</span>
             <span class="metric-value">{{ latestResult.theta?.toFixed(1) }}°</span>
@@ -115,6 +115,7 @@ const props = withDefaults(defineProps<{
 type State = 'setup' | 'idle' | 'connecting' | 'active' | 'ended'
 
 const expanded = ref(false)
+const tabVisible = ref(!document.hidden)
 const sessionState = ref<State>('setup')
 const inputKey = ref('')
 const showKey = ref(false)
@@ -141,16 +142,29 @@ const themeClass = computed(() => ({
 
 const dotClass = computed(() => {
   if (sessionState.value === 'connecting') return 'dot-yellow'
-  if (sessionState.value === 'active') return latestResult.value?.focus ? 'dot-green' : 'dot-red'
+  if (sessionState.value === 'active') {
+    if (!tabVisible.value) return ''
+    return latestResult.value?.focus ? 'dot-green' : 'dot-red'
+  }
   return ''
 })
+
+// ─── visibility ──────────────────────────────────────────────
+function onVisibilityChange() {
+  tabVisible.value = !document.hidden
+  if (sessionState.value !== 'active') return
+  if (document.hidden) session.pauseFrames()
+  else session.resumeFrames()
+}
 
 // ─── lifecycle ───────────────────────────────────────────────
 onMounted(() => {
   sessionState.value = props.apiKey ? 'idle' : 'setup'
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
   session.disconnect()
   clearTimer()
 })
@@ -193,7 +207,7 @@ async function startSession() {
       (result) => {
         latestResult.value = result
         totalFrames.value++
-        if (result.focus) focusCount.value++
+        if (result.focus && tabVisible.value) focusCount.value++
       },
       (reason) => {
         if (sessionState.value === 'active') {

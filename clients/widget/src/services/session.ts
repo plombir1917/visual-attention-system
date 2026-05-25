@@ -7,6 +7,7 @@ type ErrorCallback = (reason: string) => void
 export class SessionService {
   private ws: WebSocket | null = null
   private frameInterval: ReturnType<typeof setInterval> | null = null
+  private errorCallback: ErrorCallback | null = null
   readonly camera = new CameraService()
 
   async connect(
@@ -15,6 +16,7 @@ export class SessionService {
     onResult: ResultCallback,
     onError: ErrorCallback,
   ): Promise<void> {
+    this.errorCallback = onError
     await this.camera.start()
 
     return new Promise((resolve, reject) => {
@@ -68,6 +70,19 @@ export class SessionService {
         onError('send_error')
       }
     }, 1000)
+  }
+
+  pauseFrames(): void {
+    if (this.frameInterval) {
+      clearInterval(this.frameInterval)
+      this.frameInterval = null
+    }
+  }
+
+  resumeFrames(): void {
+    if (this.ws?.readyState === WebSocket.OPEN && !this.frameInterval && this.errorCallback) {
+      this.startFrameLoop(this.errorCallback)
+    }
   }
 
   disconnect(): void {

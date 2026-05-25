@@ -16,9 +16,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/index.ts',
-      name: 'VasAttention',
+      name: 'VasWidget',
       formats: ['es', 'umd'],
-      fileName: (fmt) => `vas-attention.${fmt === 'es' ? 'js' : 'umd.cjs'}`,
+      fileName: (fmt) => `vas-widget.${fmt === 'es' ? 'js' : 'umd.cjs'}`,
     },
   },
 })
