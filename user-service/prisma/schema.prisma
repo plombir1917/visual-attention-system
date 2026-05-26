@@ -28,10 +28,11 @@ model api_key {
 }
 
 model attention {
-  id         String   @id @default(uuid())
-  focus      Boolean
-  teta       Float
-  alpha      Float
-  distance   Float
-  created_at DateTime @default(now())
+  id          String   @id @default(uuid())
+  focus       Boolean
+  teta        Float
+  alpha       Float
+  distance    Float
+  gaze_vector Float[]
+  created_at  DateTime @default(now())
 }
