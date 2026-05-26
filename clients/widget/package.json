@@ -1,0 +1,60 @@
+{
+  "name": "vas-widget",
+  "version": "1.0.0",
+  "description": "Embeddable real-time attention monitoring widget — connects to your attention-service via WebSocket and shows a live focus indicator",
+  "keywords": [
+    "attention",
+    "focus",
+    "eye-tracking",
+    "gaze",
+    "widget",
+    "web-component",
+    "webcam",
+    "monitoring"
+  ],
+  "author": "plombir1917",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plombir1917/visual-attention-system.git",
+    "directory": "clients/widget"
+  },
+  "homepage": "https://github.com/plombir1917/visual-attention-system#readme",
+  "bugs": {
+    "url": "https://github.com/plombir1917/visual-attention-system/issues"
+  },
+  "type": "module",
+  "main": "./dist/vas-widget.umd.cjs",
+  "module": "./dist/vas-widget.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vas-widget.js",
+      "require": "./dist/vas-widget.umd.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vue-tsc --noEmit && vite build",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.3.0",
+    "vite-plugin-dts": "^4.5.4",
+    "vue-tsc": "^2.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
