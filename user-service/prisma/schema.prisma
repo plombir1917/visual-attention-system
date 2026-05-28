@@ -8,13 +8,14 @@ datasource db {
 }
 
 model user {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   name       String
-  email      String   @unique
+  email      String    @unique
   password   String
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
 
-  api_key api_key?
+  api_key  api_key?
+  sessions session[]
 }
 
 model api_key {
@@ -27,12 +28,25 @@ model api_key {
   user user @relation(fields: [user_id], references: [id])
 }
 
+model session {
+  id         String      @id
+  user_id    String
+  started_at DateTime
+  ended_at   DateTime
+
+  user       user        @relation(fields: [user_id], references: [id])
+  attentions attention[]
+}
+
 model attention {
   id          String   @id @default(uuid())
+  session_id  String?
   focus       Boolean
   teta        Float
   alpha       Float
   distance    Float
   gaze_vector Float[]
   created_at  DateTime @default(now())
+
+  session session? @relation(fields: [session_id], references: [id])
 }
