@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Server Server
-	Kafka  Kafka
+	Server   Server
+	Kafka    Kafka
+	Postgres Postgres
 }
 
 type Server struct {
@@ -23,6 +24,12 @@ type Server struct {
 type Kafka struct {
 	Brokers  []string `envconfig:"BROKER" default:"localhost:9092"`
 	ClientID string   `envconfig:"CLIENT_ID" default:"analytics-service"`
+	Topic    string   `envconfig:"TOPIC" default:"session.ended"`
+	GroupID  string   `envconfig:"GROUP_ID" default:"analytics-service"`
+}
+
+type Postgres struct {
+	DSN string `envconfig:"DSN" required:"true"`
 }
 
 func Load() (*Config, error) {
@@ -33,6 +40,9 @@ func Load() (*Config, error) {
 
 	if err := envconfig.Process("KAFKA", &cfg.Kafka); err != nil {
 		return nil, fmt.Errorf("kafka config: %w", err)
+	}
+	if err := envconfig.Process("POSTGRES", &cfg.Postgres); err != nil {
+		return nil, fmt.Errorf("postgres config: %w", err)
 	}
 
 	return &cfg, nil
