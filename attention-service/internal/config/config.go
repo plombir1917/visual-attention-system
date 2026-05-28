@@ -12,6 +12,12 @@ type Config struct {
 	Redis       Redis
 	Model       Model
 	UserService UserService
+	Kafka       Kafka
+}
+
+type Kafka struct {
+	Brokers []string `envconfig:"BROKER" default:"localhost:9092"`
+	Topic   string   `envconfig:"TOPIC" default:"session.ended"`
 }
 
 type Server struct {
@@ -52,6 +58,9 @@ func Load() (*Config, error) {
 	}
 	if err := envconfig.Process("USER_SERVICE", &cfg.UserService); err != nil {
 		return nil, fmt.Errorf("user service config: %w", err)
+	}
+	if err := envconfig.Process("KAFKA", &cfg.Kafka); err != nil {
+		return nil, fmt.Errorf("kafka config: %w", err)
 	}
 	return &cfg, nil
 }
