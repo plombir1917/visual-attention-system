@@ -7,4 +7,6 @@ torch
 numpy<2.0
 h5py
 tqdm
+grpcio
+grpcio-tools
 
