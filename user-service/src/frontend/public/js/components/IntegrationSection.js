@@ -129,7 +129,6 @@ export const IntegrationSection = {
               <pre class="intg-snippet"><span class="tok-blue">import</span> <span class="tok-white">{ mountVasWidget }</span> <span class="tok-blue">from</span> <span class="tok-green">'vas-widget'</span>
 
 <span class="tok-dim">const</span> widget <span class="tok-dim">=</span> mountVasWidget<span class="tok-dim">({</span>
-  wsUrl<span class="tok-dim">:</span> <span class="tok-green">'ws://your-server.com/ws'</span><span class="tok-dim">,</span>
   apiKey<span class="tok-dim">:</span> <span class="tok-green">'vas_live_xxx.xxx'</span><span class="tok-dim">,</span>   <span class="tok-dim">// optional — widget shows input form if omitted</span>
   position<span class="tok-dim">:</span> <span class="tok-green">'bottom-right'</span><span class="tok-dim">,</span>     <span class="tok-dim">// bottom-right | bottom-left | top-right | top-left</span>
   theme<span class="tok-dim">:</span> <span class="tok-green">'auto'</span><span class="tok-dim">,</span>                <span class="tok-dim">// auto | light | dark</span>
