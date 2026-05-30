@@ -27,6 +27,18 @@ services:
       start_period: 30s  # Kafka стартует долго
     volumes:
       - kafka_data:/var/lib/kafka/data
+  kafka-init:
+    image: apache/kafka:4.0.0
+    restart: "no"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 \
+          --create --if-not-exists --topic session.ended \
+          --partitions 1 --replication-factor 1
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
     restart: unless-stopped
@@ -128,6 +140,8 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       MODEL_GRPC_ADDR: attention-model:50051
       USER_SERVICE_BASE_URL: http://user-service:3000
+      KAFKA_BROKER: kafka:9092
+      KAFKA_TOPIC: session.ended
     depends_on:
       redis:
         condition: service_healthy
@@ -135,6 +149,8 @@ services:
         condition: service_started
       user-service:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8080/health" ]
       interval: 10s
@@ -142,7 +158,18 @@ services:
       retries: 5
     #######################################################
   analytics-service:
-    image: scratch
+    build:
+      context: ./analytics-service
+    restart: unless-stopped
+    environment:
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      KAFKA_BROKER: kafka:9092
+      KAFKA_TOPIC: session.ended
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

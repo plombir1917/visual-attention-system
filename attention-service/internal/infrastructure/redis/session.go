@@ -55,6 +55,33 @@ func (s *SessionStore) AppendAttention(ctx context.Context, sessionID string, re
 	return nil
 }
 
+func (s *SessionStore) Get(ctx context.Context, sessionID string) (domain.Session, error) {
+	data, err := s.rdb.Get(ctx, sessionKey(sessionID)).Bytes()
+	if err != nil {
+		return domain.Session{}, fmt.Errorf("redis get session: %w", err)
+	}
+	var sess domain.Session
+	if err := json.Unmarshal(data, &sess); err != nil {
+		return domain.Session{}, fmt.Errorf("unmarshal session: %w", err)
+	}
+	return sess, nil
+}
+
+func (s *SessionStore) ListAttention(ctx context.Context, sessionID string) ([]domain.AttentionResult, error) {
+	items, err := s.rdb.LRange(ctx, attentionKey(sessionID), 0, -1).Result()
+	if err != nil {
+		return nil, fmt.Errorf("redis lrange attention: %w", err)
+	}
+	results := make([]domain.AttentionResult, 0, len(items))
+	for _, item := range items {
+		var r domain.AttentionResult
+		if err := json.Unmarshal([]byte(item), &r); err == nil {
+			results = append(results, r)
+		}
+	}
+	return results, nil
+}
+
 func sessionKey(id string) string   { return "session:" + id }
 func attentionKey(id string) string { return "session:" + id + ":attention" }
 

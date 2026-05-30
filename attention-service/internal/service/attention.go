@@ -13,21 +13,24 @@ import (
 )
 
 type AttentionService struct {
-	sessions port.SessionStore
-	ttl      time.Duration
-	log      *slog.Logger
+	sessions  port.SessionStore
+	publisher port.SessionPublisher
+	ttl       time.Duration
+	log       *slog.Logger
 }
 
-func New(sessions port.SessionStore, ttl time.Duration, log *slog.Logger) *AttentionService {
+func New(sessions port.SessionStore, publisher port.SessionPublisher, ttl time.Duration, log *slog.Logger) *AttentionService {
 	return &AttentionService{
-		sessions: sessions,
-		ttl:      ttl,
-		log:      log.With("component", "attention_service"),
+		sessions:  sessions,
+		publisher: publisher,
+		ttl:       ttl,
+		log:       log.With("component", "attention_service"),
 	}
 }
 
 // RelaySession creates a Redis session for userID, then proxies frames between
 // the client WebSocket and the attention model, appending each result to the session.
+// When the session ends (for any reason), publishes a SessionEndedEvent to Kafka.
 func (s *AttentionService) RelaySession(ctx context.Context, clientWS *websocket.Conn, model port.ModelClient, userID string) {
 	sessionID, err := s.sessions.Create(ctx, userID, s.ttl)
 	if err != nil {
@@ -35,6 +38,7 @@ func (s *AttentionService) RelaySession(ctx context.Context, clientWS *websocket
 		return
 	}
 	s.log.InfoContext(ctx, "session created", "session_id", sessionID, "user_id", userID)
+	defer s.publishSessionEnded(sessionID)
 
 	for {
 		select {
@@ -68,5 +72,29 @@ func (s *AttentionService) RelaySession(ctx context.Context, clientWS *websocket
 			s.log.WarnContext(ctx, "client write error", "error", err)
 			return
 		}
+	}
+}
+
+func (s *AttentionService) publishSessionEnded(sessionID string) {
+	ctx := context.Background()
+	sess, err := s.sessions.Get(ctx, sessionID)
+	if err != nil {
+		s.log.Error("session ended publish: get session", "session_id", sessionID, "error", err)
+		return
+	}
+	results, err := s.sessions.ListAttention(ctx, sessionID)
+	if err != nil {
+		s.log.Error("session ended publish: list attention", "session_id", sessionID, "error", err)
+		return
+	}
+	event := domain.SessionEndedEvent{
+		SessionID: sessionID,
+		UserID:    sess.UserID,
+		StartedAt: sess.StartedAt,
+		EndedAt:   time.Now().UTC(),
+		Results:   results,
+	}
+	if err := s.publisher.PublishSessionEnded(ctx, event); err != nil {
+		s.log.Error("session ended publish: kafka", "session_id", sessionID, "error", err)
 	}
 }

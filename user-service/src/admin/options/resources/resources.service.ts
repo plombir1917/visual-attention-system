@@ -6,6 +6,7 @@ import { UserOptions } from './options/user/user.options.js';
 import { FeatureType, ResourceOptions, ResourceWithOptions } from 'adminjs';
 import { ActionsService } from './actions.service.js';
 import { AttentionOptions } from './options/attention/attention.options.js';
+import { SessionOptions } from './options/session/session.options.js';
 
 export interface resource {
   model?: Prisma.ModelName;
@@ -20,6 +21,7 @@ export class ResourceService {
     private readonly actionsService: ActionsService,
     private readonly userOptions: UserOptions,
     private readonly attentionOptions: AttentionOptions,
+    private readonly sessionOptions: SessionOptions
   ) {}
 
   /**
@@ -34,6 +36,10 @@ export class ResourceService {
       {
         model: Prisma.ModelName.attention,
         options: this.attentionOptions.get(),
+      },
+      {
+        model: Prisma.ModelName.session,
+        options: this.sessionOptions.get(),
       },
     ];
   }

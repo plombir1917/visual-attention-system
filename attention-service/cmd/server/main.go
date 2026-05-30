@@ -12,6 +12,7 @@ import (
 	"attention-service/internal/api/handler"
 	"attention-service/internal/api/middleware"
 	"attention-service/internal/config"
+	kafkapub "attention-service/internal/infrastructure/kafka"
 	"attention-service/internal/infrastructure/modelgrpc"
 	rediscache "attention-service/internal/infrastructure/redis"
 	"attention-service/internal/infrastructure/userhttp"
@@ -44,6 +45,9 @@ func main() {
 
 	sessions := rediscache.NewSessionStore(rdb)
 
+	publisher := kafkapub.NewPublisher(cfg.Kafka.Brokers, cfg.Kafka.Topic)
+	defer publisher.Close()
+
 	modelFactory, err := modelgrpc.NewFactory(cfg.Model)
 	if err != nil {
 		log.Error("grpc factory init failed", "error", err)
@@ -52,7 +56,7 @@ func main() {
 	defer modelFactory.Close()
 
 	authClient := userhttp.NewClient(cfg.UserService)
-	svc := service.New(sessions, cfg.Redis.TTL, log)
+	svc := service.New(sessions, publisher, cfg.Redis.TTL, log)
 
 	mux := http.NewServeMux()
 	mux.Handle("/ws", handler.NewWSHandler(svc, modelFactory, authClient, log))
