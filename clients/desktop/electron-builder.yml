@@ -1,6 +1,6 @@
 appId: com.vas.desktop
-productName: VAS Desktop
-copyright: Copyright © 2025 VAS
+productName: ФОКУС
+copyright: Copyright © 2025 ФОКУС
 
 directories:
   buildResources: resources
@@ -22,4 +22,4 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: VAS Desktop
+  shortcutName: ФОКУС

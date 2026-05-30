@@ -7,7 +7,7 @@
           <circle cx="28" cy="28" r="18" stroke="#2563eb" stroke-width="2.5" fill="none" />
           <circle cx="28" cy="28" r="7" fill="#2563eb" />
         </svg>
-        <span>VAS Desktop</span>
+        <span>Настольный клиент</span>
       </div>
       <div class="topbar-actions">
         <span class="api-key-hint">{{ maskedKey }}</span>

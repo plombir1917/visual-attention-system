@@ -6,10 +6,8 @@
 
     <div class="content">
       <div class="logo">
-        <img src="../assets/logo.png" alt="VAS" class="logo-img" />
+        <img src="../assets/logo.png" alt="ФОКУС" class="logo-img" />
       </div>
-
-      <h1 class="title">Visual Attention</h1>
       <p class="subtitle">
         Отслеживайте концентрацию в реальном времени.<br />
         Оставайтесь в фокусе — без усилий.
@@ -77,8 +75,8 @@ const router = useRouter()
 }
 
 .logo-img {
-  width: 96px;
-  height: 96px;
+  width: 25%;
+  height: 25%;
   object-fit: contain;
   border-radius: 20px;
 }
