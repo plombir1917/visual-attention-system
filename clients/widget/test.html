@@ -15,10 +15,9 @@
   <p>Запустите: <code>npx serve .</code> из папки <code>clients/widget/</code></p>
 
   <script type="module">
-    import { mountVasWidget } from './dist/vas-attention.js'
+    import { mountVasWidget } from './dist/vas-widget.js'
 
     mountVasWidget({
-      wsUrl: 'ws://localhost:8080/ws',
       // apiKey: 'vas_live_xxx.xxx',  // раскомментируйте для пропуска формы
       position: 'bottom-right',
       theme: 'auto',

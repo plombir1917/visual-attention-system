@@ -98,10 +98,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { SessionService } from './services/session'
-import type { AttentionResult } from './types'
+import { WS_URL, type AttentionResult } from './types'
 
 const props = withDefaults(defineProps<{
-  wsUrl: string
   apiKey?: string
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
   theme?: 'light' | 'dark' | 'auto'
@@ -202,7 +201,7 @@ async function startSession() {
 
   try {
     await session.connect(
-      props.wsUrl,
+      WS_URL,
       key,
       (result) => {
         latestResult.value = result

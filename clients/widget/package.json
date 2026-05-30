@@ -1,6 +1,6 @@
 {
   "name": "vas-widget",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Embeddable real-time attention monitoring widget — connects to your attention-service via WebSocket and shows a live focus indicator",
   "keywords": [
     "attention",

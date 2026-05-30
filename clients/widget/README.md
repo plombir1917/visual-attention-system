@@ -2,7 +2,7 @@
 
 Embeddable real-time attention monitoring widget for any frontend application.
 
-Connects to your [attention-service](https://github.com/plombir1917/visual-attention-system) via WebSocket, captures webcam frames, and shows a live focus indicator as a floating overlay.
+Connects to [attention-service](https://github.com/plombir1917/visual-attention-system) via WebSocket, captures webcam frames, and shows a live focus indicator as a floating overlay.
 
 ## Install
 
@@ -15,29 +15,27 @@ npm install vas-widget
 ### Programmatic (any framework)
 
 ```js
-import { mountVasWidget } from 'vas-widget'
+import { mountVasWidget } from 'vas-widget';
 
 const widget = mountVasWidget({
-  wsUrl: 'ws://your-server.com/ws',
-  apiKey: 'vas_live_xxx.xxx',   // optional — widget shows input form if omitted
-  position: 'bottom-right',     // bottom-right | bottom-left | top-right | top-left
-  theme: 'auto',                // auto | light | dark
-})
+  apiKey: 'vas_live_xxx.xxx', // optional — widget shows input form if omitted
+  position: 'bottom-right', // bottom-right | bottom-left | top-right | top-left
+  theme: 'auto', // auto | light | dark
+});
 
 // later
-widget.destroy()
+widget.destroy();
 ```
 
 ### Web Component (declarative)
 
 ```js
-import { defineVasWidget } from 'vas-widget'
-defineVasWidget() // registers <vas-widget> custom element
+import { defineVasWidget } from 'vas-widget';
+defineVasWidget(); // registers <vas-widget> custom element
 ```
 
 ```html
 <vas-widget
-  ws-url="ws://your-server.com/ws"
   api-key="vas_live_xxx.xxx"
   position="bottom-right"
   theme="auto"
@@ -47,15 +45,15 @@ defineVasWidget() // registers <vas-widget> custom element
 ### React
 
 ```jsx
-import { useEffect } from 'react'
-import { mountVasWidget } from 'vas-widget'
+import { useEffect } from 'react';
+import { mountVasWidget } from 'vas-widget';
 
 export function FocusWidget() {
   useEffect(() => {
-    const widget = mountVasWidget({ wsUrl: 'ws://your-server.com/ws' })
-    return () => widget.destroy()
-  }, [])
-  return null
+    const widget = mountVasWidget({ apiKey: 'vas_live_xxx.xxx' });
+    return () => widget.destroy();
+  }, []);
+  return null;
 }
 ```
 
@@ -63,29 +61,32 @@ export function FocusWidget() {
 
 ```vue
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
-import { mountVasWidget } from 'vas-widget'
+import { onMounted, onUnmounted } from 'vue';
+import { mountVasWidget } from 'vas-widget';
 
-let widget
-onMounted(() => { widget = mountVasWidget({ wsUrl: 'ws://your-server.com/ws' }) })
-onUnmounted(() => widget?.destroy())
+let widget;
+onMounted(() => {
+  widget = mountVasWidget({ apiKey: 'vas_live_xxx.xxx' });
+});
+onUnmounted(() => widget?.destroy());
 </script>
 ```
 
 ## Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `wsUrl` | `string` | — | WebSocket URL of your attention-service |
-| `apiKey` | `string` | `''` | API key. If omitted, widget shows an input form |
-| `position` | `string` | `'bottom-right'` | Widget position on screen |
-| `theme` | `string` | `'auto'` | Color scheme. `auto` follows `prefers-color-scheme` |
+The attention-service URL is baked into the package — there is no `wsUrl` option.
+
+| Option     | Type     | Default          | Description                                         |
+| ---------- | -------- | ---------------- | --------------------------------------------------- |
+| `apiKey`   | `string` | `''`             | API key. If omitted, widget shows an input form     |
+| `position` | `string` | `'bottom-right'` | Widget position on screen                           |
+| `theme`    | `string` | `'auto'`         | Color scheme. `auto` follows `prefers-color-scheme` |
 
 ## How it works
 
 1. User clicks the **ФОКУС** badge → widget expands
 2. User clicks **Начать мониторинг** → webcam permission is requested
-3. Widget sends JPEG frames to `wsUrl?api_key=...` every second
+3. Widget sends JPEG frames to the attention-service over WebSocket every second
 4. attention-service returns `{ focus, theta, alpha, distance }` JSON
 5. Widget shows live focus status and tracks statistics for the session
 
