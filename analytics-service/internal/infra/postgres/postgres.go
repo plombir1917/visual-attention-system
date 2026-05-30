@@ -44,10 +44,14 @@ func (w *Writer) SaveSession(ctx context.Context, event domain.SessionEndedEvent
 	}
 
 	for _, r := range event.Results {
+		gaze := r.GazeVector
+		if gaze == nil {
+			gaze = []float64{}
+		}
 		_, err = tx.Exec(ctx,
-			`INSERT INTO "attention" (id, session_id, focus, teta, alpha, distance)
-			 VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)`,
-			event.SessionID, r.Focus, r.Theta, r.Alpha, r.Distance,
+			`INSERT INTO "attention" (id, session_id, focus, teta, alpha, distance, gaze_vector)
+			 VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)`,
+			event.SessionID, r.Focus, r.Theta, r.Alpha, r.Distance, gaze,
 		)
 		if err != nil {
 			return fmt.Errorf("insert attention: %w", err)
