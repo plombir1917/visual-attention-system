@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DashboardService } from './components/dashboard/dashboard.service.js';
+import { StatisticsService } from './components/statistics/statistics.service.js';
 import { AuthService } from './auth/auth.service.js';
 import { AdminJSOptions, Locale } from 'adminjs';
 import { componentLoader, Components } from './components/components.config.js';
@@ -21,6 +22,7 @@ export class AdminJSService {
     @InjectRedis() private readonly redis: Redis,
     private readonly resourceServie: ResourceService,
     private readonly dashboardService: DashboardService,
+    private readonly statisticsService: StatisticsService,
     private readonly authService: AuthService,
   ) {}
 
@@ -139,6 +141,17 @@ export class AdminJSService {
         component: Components.UserProfile,
         icon: 'User',
         label: 'Мой профиль',
+      },
+      statistics: {
+        component: Components.Statistics,
+        handler: async (request: any, _response: any, context: any) =>
+          this.statisticsService.getStats(
+            context?.currentAdmin?.id,
+            request.query?.startDate as string | undefined,
+            request.query?.endDate as string | undefined,
+          ),
+        icon: 'BarChart2',
+        label: 'Статистика',
       },
     };
   }

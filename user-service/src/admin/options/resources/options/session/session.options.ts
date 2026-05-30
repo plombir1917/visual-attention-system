@@ -19,8 +19,7 @@ export class SessionOptions {
           isVisible: false,
         },
       },
-
-      navigation: { icon: 'Session' },
+      navigation: { icon: 'Activity' },
     };
   }
 }

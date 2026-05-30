@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AdminJSService } from './admin.service.js';
 import { DashboardService } from './components/dashboard/dashboard.service.js';
+import { StatisticsService } from './components/statistics/statistics.service.js';
 import { AuthModule } from './auth/auth.module.js';
 import { ResourceService } from './options/resources/resources.service.js';
 import { ActionsService } from './options/resources/actions.service.js';
@@ -27,6 +28,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
   providers: [
     AdminJSService,
     DashboardService,
+    StatisticsService,
     ResourceService,
     ActionsService,
     ErrorsService,

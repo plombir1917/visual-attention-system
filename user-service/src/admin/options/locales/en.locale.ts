@@ -233,6 +233,7 @@ export const en = {
     settings: 'Настройки',
     profile: 'Профиль',
     'my-profile': 'Профиль',
+    statistics: 'Статистика'
   },
   properties: {
     id: 'ID',
