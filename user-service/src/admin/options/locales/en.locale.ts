@@ -233,7 +233,7 @@ export const en = {
     settings: 'Настройки',
     profile: 'Профиль',
     'my-profile': 'Профиль',
-    statistics: 'Статистика'
+    statistics: 'Статистика',
   },
   properties: {
     id: 'ID',
@@ -295,6 +295,12 @@ export const en = {
     alpha: 'Допустимый угол',
     distance: 'Расстояние от экрана',
     created_at: 'Время',
+    gaze_vector: 'Вектор взгляда',
+    started_at: 'Время начала',
+    ended_at: 'Время окончания',
+    user: 'Пользователь',
+    user_id: 'Пользователь',
+    session: 'Сессия',
   },
   components: {
     DropZone: {
