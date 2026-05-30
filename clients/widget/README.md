@@ -1,4 +1,4 @@
-# vas-attention
+# vas-widget
 
 Embeddable real-time attention monitoring widget for any frontend application.
 
@@ -7,7 +7,7 @@ Connects to your [attention-service](https://github.com/plombir1917/visual-atten
 ## Install
 
 ```bash
-npm install vas-attention
+npm install vas-widget
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ npm install vas-attention
 ### Programmatic (any framework)
 
 ```js
-import { mountVasWidget } from 'vas-attention'
+import { mountVasWidget } from 'vas-widget'
 
 const widget = mountVasWidget({
   wsUrl: 'ws://your-server.com/ws',
@@ -31,7 +31,7 @@ widget.destroy()
 ### Web Component (declarative)
 
 ```js
-import { defineVasWidget } from 'vas-attention'
+import { defineVasWidget } from 'vas-widget'
 defineVasWidget() // registers <vas-widget> custom element
 ```
 
@@ -48,7 +48,7 @@ defineVasWidget() // registers <vas-widget> custom element
 
 ```jsx
 import { useEffect } from 'react'
-import { mountVasWidget } from 'vas-attention'
+import { mountVasWidget } from 'vas-widget'
 
 export function FocusWidget() {
   useEffect(() => {
@@ -64,7 +64,7 @@ export function FocusWidget() {
 ```vue
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
-import { mountVasWidget } from 'vas-attention'
+import { mountVasWidget } from 'vas-widget'
 
 let widget
 onMounted(() => { widget = mountVasWidget({ wsUrl: 'ws://your-server.com/ws' }) })
