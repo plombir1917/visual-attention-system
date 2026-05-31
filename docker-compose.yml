@@ -42,6 +42,9 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
     restart: unless-stopped
+    # Необязательный инструмент (отдельная JVM ~300 МБ). По умолчанию не запускается.
+    # Поднять при необходимости: docker compose --profile tools up -d
+    profiles: ["tools"]
     ports:
       - "8090:8080"
     environment:
