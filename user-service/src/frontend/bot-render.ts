@@ -1,4 +1,142 @@
-const DOMAIN = 'https://YOUR-DOMAIN-HERE.com';
+// Server-rendered HTML served to search-engine crawlers (see BOT_PATTERN in
+// frontend.controller.ts). This is the markup that actually gets indexed, so it
+// must carry the full set of SEO meta tags + JSON-LD, mirroring public/index.html.
+//
+// The canonical origin is configurable via SITE_URL so non-prod environments
+// (staging, preview) don't emit production canonical/OG URLs.
+const DOMAIN = (process.env.SITE_URL ?? 'https://vas-focus.ru').replace(
+  /\/+$/,
+  '',
+);
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${DOMAIN}/#app`,
+      name: 'ФОКУС',
+      alternateName: 'Focus Attention System',
+      description:
+        'Система контроля внимания в реальном времени. Анализирует взгляд и положение головы через камеру ноутбука — без дополнительного оборудования.',
+      applicationCategory: 'BusinessApplication',
+      applicationSubCategory: 'ProductivityApplication',
+      operatingSystem: 'Web',
+      url: DOMAIN,
+      inLanguage: 'ru',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'RUB',
+        availability: 'https://schema.org/InStock',
+      },
+      featureList: [
+        'Определение направления взгляда в реальном времени',
+        'Оценка позы головы через cv2.solvePnP',
+        'Работа только через камеру ноутбука',
+        'Приватность — видеопоток не покидает устройство',
+        'Латентность менее 35 мс',
+      ],
+      screenshot: `${DOMAIN}/og-image.png`,
+      publisher: { '@id': `${DOMAIN}/#org` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${DOMAIN}/#org`,
+      name: 'ФОКУС',
+      url: DOMAIN,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${DOMAIN}/logo.png`,
+        width: 1481,
+        height: 640,
+      },
+      sameAs: ['https://github.com/plombir1917/visual-attention-system'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${DOMAIN}/#website`,
+      url: `${DOMAIN}/`,
+      name: 'ФОКУС',
+      inLanguage: 'ru',
+      publisher: { '@id': `${DOMAIN}/#org` },
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${DOMAIN}/#webpage`,
+      url: `${DOMAIN}/`,
+      name: 'ФОКУС — Контроль внимания в реальном времени',
+      description:
+        'ФОКУС определяет, смотришь ли ты на экран, в реальном времени. Только камера ноутбука — без браслетов и трекеров.',
+      inLanguage: 'ru',
+      isPartOf: { '@id': `${DOMAIN}/#website` },
+      about: { '@id': `${DOMAIN}/#app` },
+      primaryImageOfPage: {
+        '@type': 'ImageObject',
+        url: `${DOMAIN}/og-image.png`,
+      },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${DOMAIN}/#breadcrumb`,
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Главная',
+          item: `${DOMAIN}/`,
+        },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${DOMAIN}/#faq`,
+      isPartOf: { '@id': `${DOMAIN}/#webpage` },
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Нужно ли специальное оборудование?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Нет. ФОКУС работает только через встроенную камеру ноутбука — без браслетов, очков и аппаратных трекеров взгляда.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Покидает ли видеопоток устройство?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Нет. Модель обрабатывает кадры локально, видеопоток не покидает устройство — на сервер уходят только числовые метрики внимания.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Как быстро система определяет внимание?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Полный цикл «кадр → решение» занимает менее 35 мс, результат обновляется на каждом кадре при 30 кадрах в секунду.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Как работает оценка внимания?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Нейросеть на базе ResNet вычисляет 3D-вектор взгляда, cv2.solvePnP определяет позу головы, а геометрия конуса внимания (±25° плюс запас 10°) выдаёт результат ФОКУС или ОТВЛЕЧЕНИЕ.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Сколько стоит ФОКУС?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Зарегистрироваться и начать пользоваться можно бесплатно.',
+          },
+        },
+      ],
+    },
+  ],
+});
 
 export function getBotHtml(): string {
   return `<!DOCTYPE html>
@@ -6,16 +144,45 @@ export function getBotHtml(): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <title>ФОКУС — Контроль внимания в реальном времени</title>
 <meta name="description" content="ФОКУС определяет, смотришь ли ты на экран, в реальном времени: 3D-вектор взгляда, поза головы, оценка внимания за &lt;35 мс. Только камера ноутбука — без браслетов и трекеров." />
-<meta name="robots" content="index, follow" />
+<meta name="keywords" content="контроль внимания, трекинг взгляда, eye tracking, продуктивность, фокус, нейросеть, медиапайп, mediapipe" />
+<meta name="author" content="ФОКУС / Visual Attention System" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+<meta name="yandex" content="index, follow" />
 <link rel="canonical" href="${DOMAIN}/" />
-<meta property="og:type"        content="website" />
-<meta property="og:locale"      content="ru_RU" />
-<meta property="og:title"       content="ФОКУС — Контроль внимания в реальном времени" />
-<meta property="og:description" content="Система анализирует взгляд и позу головы через камеру ноутбука. Результат за &lt;35 мс, без лишнего оборудования." />
-<meta property="og:url"         content="${DOMAIN}/" />
-<meta property="og:image"       content="${DOMAIN}/og-image.png" />
+<link rel="alternate" hreflang="ru-RU" href="${DOMAIN}/" />
+<link rel="alternate" hreflang="x-default" href="${DOMAIN}/" />
+
+<meta property="og:type"             content="website" />
+<meta property="og:locale"           content="ru_RU" />
+<meta property="og:site_name"        content="ФОКУС" />
+<meta property="og:title"            content="ФОКУС — Контроль внимания в реальном времени" />
+<meta property="og:description"      content="Система анализирует взгляд и позу головы через камеру ноутбука. Результат за &lt;35 мс, без лишнего оборудования." />
+<meta property="og:url"              content="${DOMAIN}/" />
+<meta property="og:image"            content="${DOMAIN}/og-image.png" />
+<meta property="og:image:secure_url" content="${DOMAIN}/og-image.png" />
+<meta property="og:image:type"       content="image/png" />
+<meta property="og:image:width"      content="1200" />
+<meta property="og:image:height"     content="630" />
+<meta property="og:image:alt"        content="ФОКУС — система контроля внимания" />
+
+<meta name="twitter:card"        content="summary_large_image" />
+<meta name="twitter:title"       content="ФОКУС — Контроль внимания в реальном времени" />
+<meta name="twitter:description" content="Система анализирует взгляд и позу головы через камеру ноутбука. Результат за &lt;35 мс, без лишнего оборудования." />
+<meta name="twitter:image"       content="${DOMAIN}/og-image.png" />
+<meta name="twitter:image:alt"   content="ФОКУС — система контроля внимания" />
+
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#2563eb" />
+
+<script type="application/ld+json">${jsonLd}</script>
 </head>
 <body>
 <header>
@@ -89,6 +256,20 @@ export function getBotHtml(): string {
       <li><h4>Анализ интерфейсов</h4><p>Куда смотрят пользователи? Что привлекает внимание?</p></li>
       <li><h4>Адаптивные интерфейсы</h4><p>Система знает, что вы видите — и реагирует на это.</p></li>
     </ul>
+  </section>
+
+  <section id="faq">
+    <h2>Частые вопросы</h2>
+    <h3>Нужно ли специальное оборудование?</h3>
+    <p>Нет. ФОКУС работает только через встроенную камеру ноутбука — без браслетов, очков и аппаратных трекеров взгляда.</p>
+    <h3>Покидает ли видеопоток устройство?</h3>
+    <p>Нет. Модель обрабатывает кадры локально, видеопоток не покидает устройство — на сервер уходят только числовые метрики внимания.</p>
+    <h3>Как быстро система определяет внимание?</h3>
+    <p>Полный цикл «кадр → решение» занимает менее 35 мс, результат обновляется на каждом кадре при 30 кадрах в секунду.</p>
+    <h3>Как работает оценка внимания?</h3>
+    <p>Нейросеть на базе ResNet вычисляет 3D-вектор взгляда, cv2.solvePnP определяет позу головы, а геометрия конуса внимания (±25° плюс запас 10°) выдаёт результат ФОКУС или ОТВЛЕЧЕНИЕ.</p>
+    <h3>Сколько стоит ФОКУС?</h3>
+    <p>Зарегистрироваться и начать пользоваться можно бесплатно.</p>
   </section>
 
   <section id="cta">
