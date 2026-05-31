@@ -14,7 +14,7 @@ export const SolutionSection = {
       {
         icon: `<svg viewBox="0 0 44 44" fill="none" width="44" height="44"><path d="M8 32L16 20l8 6 8-14 8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="14" r="3" fill="currentColor"/></svg>`,
         title: 'Оценка внимания',
-        desc:  'Конус внимания ±25°. Результат — ФОКУС / ОТВЛЕЧЕНИЕ + числовые метрики. Кеш в Redis, TTL 2 часа.',
+        desc:  'Конус внимания ±25°. Результат — ФОКУС / ОТВЛЕЧЕНИЕ + числовые метрики. Статистика и подробная аналитика.',
       },
     ],
   }),

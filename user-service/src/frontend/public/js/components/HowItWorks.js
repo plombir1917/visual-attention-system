@@ -1,22 +1,34 @@
 export const HowItWorks = {
   data: () => ({
     steps: [
-      { title: 'Захват',      desc: 'JPEG со встроенной камеры, 30 кадров/с по WebSocket.' },
+      { title: 'Захват',      desc: 'JPEG со встроенной камеры, 1 кадр/с по WebSocket.' },
       { title: 'Сетка лица',  desc: 'MediaPipe: 468 ориентиров, 14 ключевых для глаз.' },
-      { title: 'Нейросеть',   desc: 'ResNet, кроп 55×35 пк. Выход — вектор (x, y, z) взгляда.' },
+      { title: 'Нейросеть',   desc: 'ResNet, кроп 55×35 пк. Выход — вектор взгляда (x, y, z).' },
       { title: 'Поза головы', desc: 'cv2.solvePnP по 6 точкам → матрица R, углы наклона.' },
       { title: 'Решение',     desc: 'Угол взгляда < 25° + запас 10° → внимание = ФОКУС.' },
     ],
     tech: [
+      // ML-пайплайн (attention-model)
       { name: 'Python 3.11', icon: 'https://cdn.simpleicons.org/python/3776ab' },
       { name: 'FastAPI',     icon: 'https://cdn.simpleicons.org/fastapi/009688' },
       { name: 'PyTorch',     icon: 'https://cdn.simpleicons.org/pytorch/ee4c2c' },
       { name: 'MediaPipe',   icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cellipse cx='12' cy='12' rx='10' ry='6' stroke='%230097A7' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%230097A7'/%3E%3C/svg%3E" },
       { name: 'OpenCV',      icon: 'https://cdn.simpleicons.org/opencv/5c3ee8' },
+      // транспорт
       { name: 'WebSocket',   icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M5 8h14M5 8l3-3M5 8l3 3M19 16H5M19 16l-3-3M19 16l-3 3' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" },
+      { name: 'gRPC',        icon: 'https://cdn.simpleicons.org/grpc' },
+      // relay + аналитика (Go-сервисы)
+      { name: 'Go',          icon: 'https://cdn.simpleicons.org/go/00aed8' },
+      { name: 'Apache Kafka', icon: 'https://cdn.simpleicons.org/apachekafka/231f20' },
       { name: 'Redis',       icon: 'https://cdn.simpleicons.org/redis/dc382d' },
-      { name: 'Go relay',    icon: 'https://cdn.simpleicons.org/go/00aed8' },
+      { name: 'PostgreSQL',  icon: 'https://cdn.simpleicons.org/postgresql/4169e1' },
+      // бэкенд + админка (user-service)
+      { name: 'TypeScript',  icon: 'https://cdn.simpleicons.org/typescript/3178c6' },
       { name: 'NestJS',      icon: 'https://cdn.simpleicons.org/nestjs/e0234e' },
+      { name: 'Prisma',      icon: 'https://cdn.simpleicons.org/prisma/2d3748' },
+      // фронтенд + доставка
+      { name: 'Vue 3',       icon: 'https://cdn.simpleicons.org/vuedotjs/4fc08d' },
+      { name: 'Docker',      icon: 'https://cdn.simpleicons.org/docker/2496ed' },
     ],
   }),
   template: `
@@ -27,7 +39,7 @@ export const HowItWorks = {
             <div class="section-eyebrow reveal">Как это работает</div>
             <h2 class="section-h2 reveal">5 шагов от кадра<br>до решения.</h2>
           </div>
-          <p class="reveal" style="font-size:14px;color:#94a3b8;max-width:280px;line-height:1.7">30 кадров/с · каждый кадр — полный цикл · результат за &lt;35 мс</p>
+          <p class="reveal" style="font-size:14px;color:#94a3b8;max-width:280px;line-height:1.7">1 кадр/с · каждый кадр — полный цикл · результат за &lt;35 мс</p>
         </div>
         <div class="steps-grid">
           <div v-for="(s,i) in steps" :key="i" class="step-card reveal" :class="'reveal-d'+(i%4+1)">

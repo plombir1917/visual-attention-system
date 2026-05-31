@@ -14,7 +14,7 @@ export const BenefitsSection = {
       {
         icon:  `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="7" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
         title: 'Приватность',
-        desc:  'Видеопоток не покидает устройство. Модель работает локально.',
+        desc:  'Кадры обрабатываются на лету и не сохраняются — на сервере остаются только метрики внимания.',
       },
       {
         icon:  `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v4M9 12v4M2 9h4M12 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="3" stroke="currentColor" stroke-width="1.5"/></svg>`,
