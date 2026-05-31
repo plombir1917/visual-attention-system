@@ -16,4 +16,5 @@ COPY src/ ./src/
 
 ENV PYTHONPATH=/app/src
 
-CMD ["python", "-m", "uvicorn", "src.api.attention_service:app", "--host", "0.0.0.0", "--port", "8765"]
+# Запускает оба сервера: gRPC ($GRPC_PORT, для attention-service) и HTTP/WS ($HTTP_PORT)
+CMD ["python", "-m", "api.main"]
