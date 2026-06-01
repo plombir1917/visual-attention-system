@@ -8,7 +8,12 @@ function createWindow(): void {
     resizable: false,
     show: false,
     autoHideMenuBar: true,
-    icon: join(__dirname, '../../resources/icon.ico'),
+    icon: join(
+      __dirname,
+      process.platform === 'linux'
+        ? '../../resources/icon.png'
+        : '../../resources/icon.ico',
+    ),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
