@@ -19,8 +19,8 @@ export class UserDTO {
 
   @IsString({ message: 'Должно быть строкой.' })
   @IsNotEmpty()
-  @MinLength(4, {
-    message: 'Должно быть длиннее или равно 4 символам',
+  @MinLength(2, {
+    message: 'Должно быть длиннее или равно 2 символам',
   })
   name: string;
 
