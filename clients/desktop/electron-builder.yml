@@ -8,6 +8,8 @@ directories:
 
 files:
   - out/**/*
+  - resources/icon.ico
+  - resources/icon.png
 
 win:
   target:
@@ -24,3 +26,17 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: ФОКУС
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  icon: resources/icon.png
+  category: Utility
+  synopsis: Desktop client for the FOCUS attention system
+  maintainer: ФОКУС <zacopich@gmail.com>
+  artifactName: ФОКУС.${ext}

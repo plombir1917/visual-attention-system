@@ -149,9 +149,6 @@ widget<span class="tok-dim">.</span>destroy<span class="tok-dim">()</span></pre>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0H1.763zm4.579 4.5h11.916L18 19.5H12V9h-1.5v10.5H6L4.342 4.5h2z"/></svg>
                 Открыть на npm
               </a>
-              <a href="#how" class="intg-btn intg-btn-ghost">
-                Документация
-              </a>
             </div>
           </div>
 

@@ -65,7 +65,7 @@ export const RegisterForm = {
         <input
           v-model="name"
           type="text"
-          placeholder="Имя (от 4 символов)"
+          placeholder="Имя"
           :class="['form-field', fieldErrors.name ? 'form-field--error' : '']"
           :disabled="done||loading"
           autocomplete="name"

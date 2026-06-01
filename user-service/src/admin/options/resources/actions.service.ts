@@ -44,15 +44,16 @@ export class ActionsService {
     const actions = resource.options.actions;
 
     for (const key in actions) {
-      const defaultHandler = this.getDefaultActionHandler(key);
+      // Если ресурс задал собственный handler (в т.ч. для стандартного экшена,
+      // например скоупленный по пользователю list) — берём его, иначе дефолтный.
+      const baseHandler = actions[key]?.handler ?? this.getDefaultActionHandler(key);
 
-      // кастомные action'ы (не из стандартного набора AdminJS) имеют собственный
-      // handler — не перетираем его
-      if (!defaultHandler) continue;
+      // кастомные action'ы без handler'а и без дефолта оставляем как есть
+      if (!baseHandler) continue;
 
       wrappedResource.options.actions![key] = {
         ...actions[key],
-        handler: this.errorsService.withErrorHandler(defaultHandler),
+        handler: this.errorsService.withErrorHandler(baseHandler),
       };
     }
 
