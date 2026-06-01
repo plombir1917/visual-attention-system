@@ -100,7 +100,7 @@ export default function Dashboard() {
               <InfoRow label="Конец" value={fmtTime(s.endedAt)} />
               <InfoRow label="Средний θ" value={s.avgTheta.toFixed(3)} />
               <InfoRow label="Средний α" value={s.avgAlpha.toFixed(3)} />
-              <InfoRow label="Расстояние" value={`${s.avgDistance.toFixed(1)} см`} />
+              <InfoRow label="Расстояние" value={`${s.avgDistance.toFixed(1)} м`} />
               <InfoRow label="ID сессии" value={s.id.slice(0, 14) + '…'} mono />
             </Panel>
 
@@ -122,7 +122,7 @@ export default function Dashboard() {
               <LineChart data={s.attentions} vKey="alpha" color="#0ea5e9" />
             </Panel>
             <Panel title="Расстояние до экрана" style={{ flex: '1 1 260px', minWidth: 220 }}>
-              <LineChart data={s.attentions} vKey="distance" color="#f59e0b" yUnit=" см" />
+              <LineChart data={s.attentions} vKey="distance" color="#f59e0b" yUnit=" м" />
             </Panel>
           </div>
 
@@ -360,7 +360,7 @@ function AttentionTable({ attentions }) {
               </td>
               <td style={td}>{a.teta.toFixed(4)}</td>
               <td style={td}>{a.alpha.toFixed(4)}</td>
-              <td style={td}>{a.distance.toFixed(1)} см</td>
+              <td style={td}>{a.distance.toFixed(1)} м</td>
             </tr>
           ))}
         </tbody>
