@@ -8,10 +8,19 @@
 <title>ФОКУС — Контроль внимания в реальном времени</title>
 <meta name="description" content="ФОКУС определяет, смотришь ли ты на экран, в реальном времени: 3D-вектор взгляда, поза головы, оценка внимания за &lt;35 мс. Только камера ноутбука — без браслетов и трекеров." />
 <meta name="keywords" content="контроль внимания, трекинг взгляда, eye tracking, продуктивность, фокус, нейросеть, медиапайп, mediapipe" />
-<meta name="robots" content="index, follow" />
-<link rel="canonical" href="https://YOUR-DOMAIN-HERE.com/" />
+<meta name="author" content="ФОКУС / Visual Attention System" />
+<meta name="application-name" content="ФОКУС" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+<meta name="yandex" content="index, follow" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="rating" content="general" />
+<link rel="canonical" href="https://vas-focus.ru/" />
+<link rel="alternate" hreflang="ru-RU" href="https://vas-focus.ru/" />
+<link rel="alternate" hreflang="x-default" href="https://vas-focus.ru/" />
 
-<!-- ══ VERIFICATION — заменить после регистрации в кабинетах ══ -->
+<!-- ══ VERIFICATION — заменить YOUR-…-CODE после регистрации в Я.Вебмастер / Google Search Console ══ -->
 <meta name="yandex-verification" content="YOUR-YANDEX-VERIFICATION-CODE" />
 <meta name="google-site-verification" content="YOUR-GOOGLE-VERIFICATION-CODE" />
 
@@ -21,17 +30,20 @@
 <meta property="og:site_name"    content="ФОКУС" />
 <meta property="og:title"        content="ФОКУС — Контроль внимания в реальном времени" />
 <meta property="og:description"  content="Система анализирует взгляд и позу головы через камеру ноутбука. Результат — ФОКУС или ОТВЛЕЧЕНИЕ — за &lt;35 мс, без лишнего оборудования." />
-<meta property="og:url"          content="https://YOUR-DOMAIN-HERE.com/" />
-<meta property="og:image"        content="https://YOUR-DOMAIN-HERE.com/og-image.png" />
-<meta property="og:image:width"  content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt"    content="ФОКУС — система контроля внимания" />
+<meta property="og:url"             content="https://vas-focus.ru/" />
+<meta property="og:image"           content="https://vas-focus.ru/og-image.png" />
+<meta property="og:image:secure_url" content="https://vas-focus.ru/og-image.png" />
+<meta property="og:image:type"      content="image/png" />
+<meta property="og:image:width"     content="1200" />
+<meta property="og:image:height"    content="630" />
+<meta property="og:image:alt"       content="ФОКУС — система контроля внимания" />
 
 <!-- ══ TWITTER CARD ══ -->
 <meta name="twitter:card"        content="summary_large_image" />
 <meta name="twitter:title"       content="ФОКУС — Контроль внимания в реальном времени" />
 <meta name="twitter:description" content="Система анализирует взгляд и позу головы через камеру ноутбука. Результат за &lt;35 мс, без лишнего оборудования." />
-<meta name="twitter:image"       content="https://YOUR-DOMAIN-HERE.com/og-image.png" />
+<meta name="twitter:image"       content="https://vas-focus.ru/og-image.png" />
+<meta name="twitter:image:alt"   content="ФОКУС — система контроля внимания" />
 
 <!-- ══ FAVICON ══ -->
 <link rel="icon"             type="image/x-icon"            href="favicon.ico" />
@@ -41,15 +53,29 @@
 
 <!-- ══ PWA / THEME ══ -->
 <link rel="manifest" href="manifest.webmanifest" />
-<meta name="theme-color" content="#2563eb" />
+<meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0b0e1a" media="(prefers-color-scheme: dark)" />
+<meta name="color-scheme" content="light dark" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="ФОКУС" />
+<meta name="msapplication-TileColor" content="#2563eb" />
+<meta name="msapplication-TileImage" content="android-chrome-192x192.png" />
+<meta name="msapplication-config" content="browserconfig.xml" />
 
 <!-- ══ PERFORMANCE ══ -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://unpkg.com" crossorigin />
+<link rel="dns-prefetch" href="https://unpkg.com" />
 <link rel="preload" href="logo.png" as="image" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+<!-- Own CSS first (render-critical), web font loaded non-blocking to protect LCP -->
 <link rel="stylesheet" href="style.css" />
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" /></noscript>
+<!-- defer keeps Vue non-render-blocking; still executes before the deferred module app.js (document order) -->
+<script defer src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
 <!-- ══ STRUCTURED DATA ══ -->
 <script type="application/ld+json">
@@ -58,14 +84,14 @@
   "@graph": [
     {
       "@type": "SoftwareApplication",
-      "@id": "https://YOUR-DOMAIN-HERE.com/#app",
+      "@id": "https://vas-focus.ru/#app",
       "name": "ФОКУС",
       "alternateName": "Focus Attention System",
       "description": "Система контроля внимания в реальном времени. Анализирует взгляд и положение головы через камеру ноутбука — без дополнительного оборудования.",
       "applicationCategory": "BusinessApplication",
       "applicationSubCategory": "ProductivityApplication",
       "operatingSystem": "Web",
-      "url": "https://YOUR-DOMAIN-HERE.com",
+      "url": "https://vas-focus.ru",
       "inLanguage": "ru",
       "offers": {
         "@type": "Offer",
@@ -80,29 +106,96 @@
         "Приватность — видеопоток не покидает устройство",
         "Латентность менее 35 мс"
       ],
-      "screenshot": "https://YOUR-DOMAIN-HERE.com/og-image.png",
-      "publisher": { "@id": "https://YOUR-DOMAIN-HERE.com/#org" }
+      "screenshot": "https://vas-focus.ru/og-image.png",
+      "publisher": { "@id": "https://vas-focus.ru/#org" }
     },
     {
       "@type": "Organization",
-      "@id": "https://YOUR-DOMAIN-HERE.com/#org",
+      "@id": "https://vas-focus.ru/#org",
       "name": "ФОКУС",
-      "url": "https://YOUR-DOMAIN-HERE.com",
+      "url": "https://vas-focus.ru",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://YOUR-DOMAIN-HERE.com/logo.png",
-        "width": 512,
-        "height": 512
-      }
+        "url": "https://vas-focus.ru/logo.png",
+        "width": 1481,
+        "height": 640
+      },
+      "sameAs": [
+        "https://github.com/plombir1917/visual-attention-system"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://vas-focus.ru/#website",
+      "url": "https://vas-focus.ru/",
+      "name": "ФОКУС",
+      "inLanguage": "ru",
+      "publisher": { "@id": "https://vas-focus.ru/#org" }
     },
     {
       "@type": "WebPage",
-      "@id": "https://YOUR-DOMAIN-HERE.com/#webpage",
-      "url": "https://YOUR-DOMAIN-HERE.com/",
+      "@id": "https://vas-focus.ru/#webpage",
+      "url": "https://vas-focus.ru/",
       "name": "ФОКУС — Контроль внимания в реальном времени",
       "description": "ФОКУС определяет, смотришь ли ты на экран, в реальном времени. Только камера ноутбука — без браслетов и трекеров.",
       "inLanguage": "ru",
-      "isPartOf": { "@id": "https://YOUR-DOMAIN-HERE.com/#app" }
+      "isPartOf": { "@id": "https://vas-focus.ru/#website" },
+      "about": { "@id": "https://vas-focus.ru/#app" },
+      "primaryImageOfPage": { "@type": "ImageObject", "url": "https://vas-focus.ru/og-image.png" }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vas-focus.ru/#breadcrumb",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://vas-focus.ru/" }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://vas-focus.ru/#faq",
+      "isPartOf": { "@id": "https://vas-focus.ru/#webpage" },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Нужно ли специальное оборудование?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Нет. ФОКУС работает только через встроенную камеру ноутбука — без браслетов, очков и аппаратных трекеров взгляда."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Покидает ли видеопоток устройство?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Нет. Модель обрабатывает кадры локально, видеопоток не покидает устройство — на сервер уходят только числовые метрики внимания."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Как быстро система определяет внимание?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Полный цикл «кадр → решение» занимает менее 35 мс, результат обновляется на каждом кадре при 30 кадрах в секунду."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Как работает оценка внимания?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Нейросеть на базе ResNet вычисляет 3D-вектор взгляда, cv2.solvePnP определяет позу головы, а геометрия конуса внимания (±25° плюс запас 10°) выдаёт результат ФОКУС или ОТВЛЕЧЕНИЕ."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Сколько стоит ФОКУС?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Зарегистрироваться и начать пользоваться можно бесплатно."
+          }
+        }
+      ]
     }
   ]
 }
@@ -145,5 +238,14 @@
 </div>
 
 <script type="module" src="js/app.js"></script>
+
+<!-- ══ PWA SERVICE WORKER ══ -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+</script>
 </body>
 </html>

@@ -69,12 +69,9 @@ export const IntegrationSection = {
 
             <div class="intg-actions">
               <a href="/ФОКУС.exe" class="intg-btn intg-btn-primary" download>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Скачать
-                <span class="intg-btn-sub">v1.0.0 · ~80 МБ</span>
-              </a>
-              <a href="#how" class="intg-btn intg-btn-ghost">
-                Инструкция
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+                Windows
+                <span class="intg-btn-sub">.exe · ~80 МБ</span>
               </a>
             </div>
           </div>
