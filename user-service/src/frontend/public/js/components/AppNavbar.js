@@ -18,6 +18,7 @@ export const AppNavbar = {
           <a href="#problem"     class="nav-link">Проблема</a>
           <a href="#solution"    class="nav-link">Решение</a>
           <a href="#how"         class="nav-link">Как работает</a>
+          <a href="#start"       class="nav-link">Инструкция</a>
           <a href="#integration" class="nav-link">Подключение</a>
         </div>
         <a href="#cta" class="nav-cta">Попробовать</a>
