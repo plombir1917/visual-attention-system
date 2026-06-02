@@ -26,7 +26,7 @@ export const GettingStarted = {
       },
       {
         title: 'Анализируйте результаты',
-        desc: 'Смотрите статистику внимания и историю сессий в админ-панели.',
+        desc: 'Смотрите статистику внимания и историю сессий в личном кабинете.',
       },
     ],
   }),
@@ -35,9 +35,9 @@ export const GettingStarted = {
       <div class="section-wrap">
         <div class="start-head">
           <div class="section-eyebrow reveal">С чего начать</div>
-          <h2 class="section-h2 reveal" style="margin-bottom:16px">Инструкция —<br>от старта до аналитики.</h2>
+          <h2 class="section-h2 reveal" style="margin-bottom:16px">Инструкция —<br>от регистрации до аналитики.</h2>
           <p class="reveal" style="font-size:16px;color:#64748b;line-height:1.75;max-width:460px">
-            От регистрации до первой сессии. Без сложной настройки — подключите ФОКУС удобным способом и начните.
+           Без сложной настройки — подключите ФОКУС удобным способом и начните.
           </p>
         </div>
 

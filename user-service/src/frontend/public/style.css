@@ -347,13 +347,25 @@ section { padding: 112px 0; }
   margin-bottom: 22px;
 }
 
+/* Пример использования — скриншот запущенного приложения */
+.intg-shot { margin-bottom: 24px; }
+.intg-shot-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 10px;
+}
+.intg-shot img {
+  display: block; width: 100%; height: auto;
+  border-radius: 14px; border: 1px solid var(--border);
+  background: #f1f5f9;
+  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+}
+
 .intg-features { display: flex; flex-direction: column; gap: 9px; margin-bottom: 24px; }
 .intg-feat {
   display: flex; align-items: center; gap: 8px;
   font-size: 13px; color: #374151; font-weight: 500;
 }
 
-.intg-platforms { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
 .platform-badge {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 12px; font-weight: 600; color: #374151;
@@ -424,17 +436,39 @@ section { padding: 112px 0; }
   font-size: 11px; font-weight: 400; opacity: .7; margin-left: 2px;
 }
 
-/* SmartScreen-инструкция + контрольная сумма установщика */
-.intg-win-note {
+/* SmartScreen-подсказка — всплывает при наведении/фокусе на Windows-кнопку */
+.intg-dl { position: relative; display: inline-flex; }
+.intg-win-tip {
+  position: absolute;
+  bottom: calc(100% + 10px); left: 0;
+  width: 300px; max-width: 80vw;
   display: flex; gap: 9px; align-items: flex-start;
-  margin-top: 12px; padding: 11px 13px;
-  background: rgba(245,158,11,.06);
-  border: 1px solid rgba(245,158,11,.22);
+  padding: 11px 13px;
+  background: #fdf6e9;
+  border: 1px solid rgba(245,158,11,.28);
   border-radius: 10px;
+  box-shadow: var(--shadow-md);
   font-size: 12.5px; line-height: 1.55; color: #92621a;
+  opacity: 0; visibility: hidden; transform: translateY(4px);
+  transition: opacity .2s ease, transform .2s ease, visibility .2s;
+  pointer-events: none; z-index: 5;
 }
-.intg-win-note > svg { flex: 0 0 auto; margin-top: 1px; color: #d97706; }
-.intg-win-note b { font-weight: 600; }
+.intg-win-tip > svg { flex: 0 0 auto; margin-top: 1px; color: #d97706; }
+.intg-win-tip b { font-weight: 600; }
+/* хвостик-каретка к кнопке */
+.intg-win-tip::after {
+  content: ''; position: absolute; top: 100%; left: 24px;
+  border: 6px solid transparent; border-top-color: #fdf6e9;
+}
+.intg-dl:hover .intg-win-tip,
+.intg-dl:focus-within .intg-win-tip {
+  opacity: 1; visibility: visible; transform: translateY(0);
+}
+/* В адаптиве обёртка ведёт себя как сама кнопка (делёж строки / стопка) */
+@media (max-width: 960px) {
+  .intg-dl { flex: 1 1 auto; }
+  .intg-dl .intg-btn { width: 100%; }
+}
 
 .intg-api-note {
   background: rgba(37,99,235,.04);
