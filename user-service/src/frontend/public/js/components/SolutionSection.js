@@ -4,7 +4,7 @@ export const SolutionSection = {
       {
         icon: `<svg viewBox="0 0 44 44" fill="none" width="44" height="44"><ellipse cx="22" cy="22" rx="18" ry="10" stroke="currentColor" stroke-width="1.5"/><circle cx="22" cy="22" r="6" stroke="currentColor" stroke-width="1.5" opacity=".6"/><circle cx="22" cy="22" r="2.5" fill="currentColor"/></svg>`,
         title: 'Направление взгляда',
-        desc:  'Камера определяет, куда именно вы смотрите, — с точностью до 2.5°. Модель обучена на 80 000+ примеров, поэтому уверенно работает с разными лицами и при разном освещении.',
+        desc:  'Нейросеть определяет, куда именно вы смотрите, — с точностью до 2.5°. Модель обучена на 80 000+ примеров, поэтому уверенно работает с разными лицами и при разном освещении.',
       },
       {
         icon: `<svg viewBox="0 0 44 44" fill="none" width="44" height="44"><rect x="10" y="6" width="24" height="28" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M16 18l4 4 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,

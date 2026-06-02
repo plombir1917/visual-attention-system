@@ -3,6 +3,11 @@ name: Deploy
 # CI/CD: при пуше в main подключаемся к серверу по SSH,
 # подтягиваем свежий код и пересобираем стек через docker compose.
 #
+# ВАЖНО: на сервере должен быть установлен git-lfs (apt install git-lfs).
+# Дистрибутивы лендинга (.zip/.exe/.AppImage) и датасеты хранятся в Git LFS;
+# без `git lfs pull` в рабочем дереве остаются 130-байтные указатели, и
+# Docker (`COPY . .`) запекает их в образ — лендинг отдаёт битые архивы.
+#
 # Требуемые GitHub Secrets (Settings → Secrets and variables → Actions):
 #   SSH_HOST      — IP или домен сервера
 #   SSH_USER      — пользователь для SSH (например, deploy)
@@ -39,6 +44,12 @@ jobs:
             echo "==> Подтягиваем свежий main"
             git fetch --all --prune
             git reset --hard origin/main
+
+            echo "==> Материализуем файлы из Git LFS (.zip/.exe/.AppImage, датасеты)"
+            # git reset/fetch НЕ скачивают LFS-объекты — без этого в дереве
+            # остаются указатели, которые попадут в Docker-образ как «архивы».
+            git lfs install --local
+            git lfs pull
 
             echo "==> Пересобираем и поднимаем стек"
             docker compose up -d --build --remove-orphans
