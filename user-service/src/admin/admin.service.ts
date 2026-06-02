@@ -71,16 +71,16 @@ export class AdminJSService {
    * @description Возвращает объект SessionOptions из express-session
    */
   getAdminJsSessionOptions(): SessionOptions {
-    if (!process.env.SECRET) {
-      throw new Error('No secret value in .env');
-    }
+    // if (!process.env.SECRET) {
+    //   throw new Error('No secret value in .env');
+    // }
 
     const cookieName = 'auth';
     const isProd = process.env.NODE_ENV === 'prod';
 
     return createSessionOptions({
       redis: this.redis,
-      secret: process.env.SECRET,
+      secret: process.env.SECRET!,
       cookieName,
       isProd,
     });
@@ -92,14 +92,14 @@ export class AdminJSService {
    * @description Возвращает реализацию метода authenticate, параметры cookie.
    */
   getAdminJsAuth(): AdminJsAuth {
-    if (!process.env.SECRET) {
-      throw new Error('No secret value in .env');
-    }
+    // if (!process.env.SECRET) {
+    //   throw new Error('No secret value in .env');
+    // }
     return {
       authenticate: async (email, password) =>
         await this.authService.login(email, password),
       cookieName: 'auth',
-      cookiePassword: process.env.SECRET,
+      cookiePassword: process.env.SECRET!,
     };
   }
 

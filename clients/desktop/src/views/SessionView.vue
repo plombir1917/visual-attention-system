@@ -150,6 +150,7 @@ import { ref, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/app'
 import { SessionService } from '../services/session'
+import { CameraError } from '../services/camera'
 
 const router = useRouter()
 const store = useAppStore()
@@ -226,8 +227,13 @@ async function startSession() {
       store.tickElapsed()
       if (store.remainingSeconds <= 0) stopSession()
     }, 1000)
-  } catch {
-    errorMsg.value = 'Не удалось подключиться. Проверьте API-ключ и сервер.'
+  } catch (err) {
+    // Ошибка камеры (нет устройства / нет доступа) важнее ошибки сети —
+    // показываем её конкретный текст, иначе общий совет про ключ и сервер.
+    errorMsg.value =
+      err instanceof CameraError
+        ? err.message
+        : 'Не удалось подключиться. Проверьте API-ключ и сервер.'
     store.setSessionState('idle')
   }
 }

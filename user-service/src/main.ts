@@ -45,6 +45,15 @@ async function bootstrap() {
           res.setHeader('Service-Worker-Allowed', '/');
         } else if (/\.(png|ico|jpg|jpeg|svg|webp|woff2?)$/.test(file)) {
           res.setHeader('Cache-Control', 'public, max-age=604800'); // 7d for assets
+        } else if (/\.(exe|zip|AppImage|deb)$/i.test(file)) {
+          // Desktop installers: force a binary download with an explicit
+          // filename. Correct Content-Type/Disposition avoids the browser
+          // sniffing the file and is one less reason for download warnings.
+          res.setHeader('Content-Type', 'application/octet-stream');
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${file.split('/').pop()}"`,
+          );
         }
       },
     }),
