@@ -8,6 +8,17 @@ RUN npm ci
 
 COPY . .
 
+# Защита от запекания Git LFS-указателей вместо реальных дистрибутивов:
+# если `git lfs pull` не отработал на хосте, в контекст попадают ~130-байтные
+# текстовые указатели — лендинг тогда отдаёт битые архивы. Падаем явно здесь.
+RUN for f in src/frontend/public/*.zip src/frontend/public/*.exe src/frontend/public/*.AppImage; do \
+      [ -e "$f" ] || continue; \
+      if head -c 64 "$f" | grep -q "git-lfs.github.com"; then \
+        echo "ERROR: $f — это указатель Git LFS, а не файл. Выполните 'git lfs pull' перед сборкой." >&2; \
+        exit 1; \
+      fi; \
+    done
+
 RUN npm run generate
 RUN npm run build
 
