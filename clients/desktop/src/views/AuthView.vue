@@ -38,8 +38,9 @@
           <span v-if="errorMsg" class="error-msg">{{ errorMsg }}</span>
         </div>
 
-        <button type="submit" class="btn-submit" :disabled="!key.trim()">
-          Подключиться
+        <button type="submit" class="btn-submit" :disabled="!key.trim() || checking">
+          <span v-if="checking" class="spinner" />
+          {{ checking ? 'Проверка…' : 'Подключиться' }}
         </button>
       </form>
 
@@ -59,21 +60,39 @@ const store = useAppStore()
 const key = ref(store.apiKey)
 const showKey = ref(false)
 const errorMsg = ref('')
+const checking = ref(false)
 
 const KEY_RE = /^vas_live_[A-Za-z0-9]+\..+$/
 const isValid = computed(() => KEY_RE.test(key.value.trim()))
 
-function submit() {
+async function submit() {
   const trimmed = key.value.trim()
-  if (!trimmed) return
+  if (!trimmed || checking.value) return
 
   if (!KEY_RE.test(trimmed)) {
     errorMsg.value = 'Неверный формат. Ожидается: vas_live_xxxxxx.xxxxxx'
     return
   }
 
-  store.setApiKey(trimmed)
-  router.push('/session')
+  // Проверяем ключ на сервере уже здесь, а не только при старте сессии.
+  errorMsg.value = ''
+  checking.value = true
+  try {
+    const result = await window.vasApi?.validateApiKey?.(store.wsUrl, trimmed)
+    if (result === 'invalid') {
+      errorMsg.value = 'Неверный API-ключ. Проверьте и попробуйте снова.'
+      return
+    }
+    if (result === 'unreachable') {
+      errorMsg.value = 'Не удалось связаться с сервером. Попробуйте позже.'
+      return
+    }
+    // 'valid' либо undefined (запуск вне Electron) — пропускаем дальше.
+    store.setApiKey(trimmed)
+    router.push('/session')
+  } finally {
+    checking.value = false
+  }
 }
 </script>
 
@@ -185,6 +204,10 @@ form {
 }
 
 .btn-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 12px;
   background: var(--blue);
   color: #fff;
@@ -199,6 +222,16 @@ form {
 .btn-submit:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
 }
 
 .btn-back {

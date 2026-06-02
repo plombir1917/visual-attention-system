@@ -11,5 +11,9 @@ interface ImportMeta {
 interface Window {
   vasApi: {
     platform: string
+    validateApiKey: (
+      wsUrl: string,
+      apiKey: string,
+    ) => Promise<'valid' | 'invalid' | 'unreachable'>
   }
 }

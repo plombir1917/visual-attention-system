@@ -1,6 +1,6 @@
 appId: com.vas.desktop
 productName: ФОКУС
-copyright: Copyright © 2025 ФОКУС
+copyright: Copyright © 2026 ФОКУС
 
 directories:
   buildResources: resources
@@ -17,7 +17,12 @@ win:
       arch:
         - x64
   icon: resources/icon.ico
-  artifactName: ФОКУС.${ext}
+  # Латиница в имени: кириллица в имени .exe усиливает подозрительность части
+  # антивирусов и ломает ссылку/Content-Disposition при раздаче. Отображаемое
+  # имя приложения (productName: ФОКУС) при этом остаётся прежним.
+  artifactName: FOCUS-Setup.${ext}
+  # Имя компании/издателя в свойствах файла (version-info).
+  legalTrademarks: ФОКУС
 
 nsis:
   oneClick: false
@@ -39,4 +44,4 @@ linux:
   category: Utility
   synopsis: Desktop client for the FOCUS attention system
   maintainer: ФОКУС <zacopich@gmail.com>
-  artifactName: ФОКУС.${ext}
+  artifactName: FOCUS.${ext}

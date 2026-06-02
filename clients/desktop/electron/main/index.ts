@@ -1,5 +1,41 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, net, shell } from 'electron'
 import { join } from 'path'
+
+type ApiKeyCheck = 'valid' | 'invalid' | 'unreachable'
+
+/**
+ * Проверяет API-ключ заранее, на этапе ввода, тем же сервером, что и сессия.
+ * Делается в main-процессе (минуя CORS): GET на ws-эндпоинт, приведённый к http.
+ * Сервер авторизует ключ до WebSocket-апгрейда, поэтому статус однозначен:
+ *   401            — ключ отвергнут;
+ *   5xx / нет сети — сервер недоступен;
+ *   иначе          — ключ принят (не-WS GET после авторизации завершится 400).
+ */
+async function validateApiKey(wsUrl: string, apiKey: string): Promise<ApiKeyCheck> {
+  const httpUrl = wsUrl.replace(/^ws/, 'http')
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 8000)
+  try {
+    const resp = await net.fetch(httpUrl, {
+      method: 'GET',
+      headers: { 'X-Api-Key': apiKey },
+      signal: controller.signal,
+    })
+    if (resp.status === 401) return 'invalid'
+    if (resp.status >= 500) return 'unreachable'
+    return 'valid'
+  } catch {
+    return 'unreachable'
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+ipcMain.handle(
+  'validate-api-key',
+  (_event, payload: { wsUrl: string; apiKey: string }): Promise<ApiKeyCheck> =>
+    validateApiKey(payload.wsUrl, payload.apiKey),
+)
 
 function createWindow(): void {
   const win = new BrowserWindow({

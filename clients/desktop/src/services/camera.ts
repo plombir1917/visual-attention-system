@@ -1,3 +1,46 @@
+export type CameraErrorCode =
+  | 'not_found'
+  | 'permission_denied'
+  | 'in_use'
+  | 'unknown'
+
+/** Ошибка доступа к веб-камере с человекочитаемым сообщением. */
+export class CameraError extends Error {
+  constructor(
+    readonly code: CameraErrorCode,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'CameraError'
+  }
+}
+
+/** Приводит ошибку getUserMedia к доменной CameraError с понятным текстом. */
+function toCameraError(err: unknown): CameraError {
+  const name = err instanceof DOMException ? err.name : ''
+  switch (name) {
+    case 'NotFoundError':
+    case 'DevicesNotFoundError':
+    case 'OverconstrainedError':
+      return new CameraError('not_found', 'Веб-камера не обнаружена')
+    case 'NotAllowedError':
+    case 'PermissionDeniedError':
+    case 'SecurityError':
+      return new CameraError(
+        'permission_denied',
+        'Нет доступа к камере. Разрешите использование камеры в настройках системы.',
+      )
+    case 'NotReadableError':
+    case 'TrackStartError':
+      return new CameraError(
+        'in_use',
+        'Камера занята другим приложением. Закройте его и попробуйте снова.',
+      )
+    default:
+      return new CameraError('unknown', 'Не удалось получить доступ к камере.')
+  }
+}
+
 export class CameraService {
   private stream: MediaStream | null = null
   private readonly canvas: HTMLCanvasElement
@@ -11,10 +54,14 @@ export class CameraService {
   }
 
   async start(): Promise<void> {
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: 'user' },
-      audio: false,
-    })
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: 'user' },
+        audio: false,
+      })
+    } catch (err) {
+      throw toCameraError(err)
+    }
   }
 
   attachPreview(videoEl: HTMLVideoElement): void {
