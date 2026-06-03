@@ -1,7 +1,8 @@
 import { RegisterForm } from './RegisterForm.js';
+import { VkLoginButton } from './VkLoginButton.js';
 
 export const CtaSection = {
-  components: { RegisterForm },
+  components: { RegisterForm, VkLoginButton },
   template: `
     <section class="cta-dark" id="cta">
       <div class="cta-glow"></div>
@@ -18,6 +19,7 @@ export const CtaSection = {
           </p>
           <div style="max-width:360px;margin:0 auto">
             <register-form></register-form>
+            <vk-login-button></vk-login-button>
           </div>
         </div>
       </div>

@@ -519,6 +519,25 @@ section { padding: 112px 0; }
   border-color: rgba(239,68,68,.25);
 }
 
+/* ── VK ID LOGIN ── */
+.vk-login { margin-top: 16px; }
+.vk-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 14px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+.vk-login-divider::before,
+.vk-login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(148,163,184,.25);
+}
+.vk-login-widget { display: flex; justify-content: center; }
+
 /* ── TOAST ── */
 .toast {
   position: fixed; bottom: 32px; right: 32px; z-index: 999;

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DashboardService } from './components/dashboard/dashboard.service.js';
 import { StatisticsService } from './components/statistics/statistics.service.js';
 import { AuthService } from './auth/auth.service.js';
+import { VkidService } from './auth/vkid.service.js';
 import { AdminJSOptions, Locale } from 'adminjs';
 import { componentLoader, Components } from './components/components.config.js';
 import { customTheme } from './options/themes/custom.theme.js';
@@ -24,6 +25,7 @@ export class AdminJSService {
     private readonly dashboardService: DashboardService,
     private readonly statisticsService: StatisticsService,
     private readonly authService: AuthService,
+    private readonly vkidService: VkidService,
   ) {}
 
   /**
@@ -54,7 +56,12 @@ export class AdminJSService {
       availableThemes: [customTheme],
       assets: {
         // styles: ['/style.css'],
-        scripts: ['/js/admin-login-prefill.js'],
+        // vkid-auth.js должен идти ПЕРЕД admin-vkid.js (тот использует window.VkAuth).
+        scripts: [
+          '/js/admin-login-prefill.js',
+          '/js/vkid-auth.js',
+          '/js/admin-vkid.js',
+        ],
       },
       dashboard: this.getDashboard(),
       pages: this.getPages(),
@@ -96,8 +103,21 @@ export class AdminJSService {
     //   throw new Error('No secret value in .env');
     // }
     return {
-      authenticate: async (email, password) =>
-        await this.authService.login(email, password),
+      // AdminJS вызывает authenticate(email, password, context), где
+      // context = { req, res }, а req.fields (express-formidable) содержит все
+      // поля формы. VK-вход сабмитит скрытую форму с полем vkAccessToken — при
+      // его наличии идём по ветке VK ID, иначе — штатный вход email/пароль.
+      authenticate: async (email, password, context?: { req?: any }) => {
+        const vkAccessToken = context?.req?.fields?.vkAccessToken as
+          | string
+          | undefined;
+        if (vkAccessToken) {
+          return await this.vkidService.authenticateByAccessToken(
+            vkAccessToken,
+          );
+        }
+        return await this.authService.login(email, password);
+      },
       cookieName: 'auth',
       cookiePassword: process.env.SECRET!,
     };
