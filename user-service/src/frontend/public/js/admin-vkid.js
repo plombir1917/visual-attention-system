@@ -15,24 +15,27 @@
     var passwordInput = document.querySelector('input[type="password"]');
     if (!passwordInput) return false;
 
-    // Поднимаемся до form (или ближайшего блока), чтобы вставить виджет после неё.
-    var form = passwordInput.closest('form') || passwordInput.parentElement;
+    var form = passwordInput.closest('form');
     if (!form) return false;
 
+    // Вставляем ВНУТРЬ формы последним элементом (после кнопки «Войти»), иначе
+    // блок становится соседним flex-элементом панели AdminJS и улетает в угол.
     var wrap = document.createElement('div');
-    wrap.style.marginTop = '16px';
+    wrap.style.cssText =
+      'margin-top:20px;width:100%;display:flex;flex-direction:column;align-items:center';
 
     var divider = document.createElement('div');
     divider.textContent = 'или';
     divider.style.cssText =
-      'text-align:center;color:#94a3b8;font-size:12px;margin:8px 0 12px';
+      'text-align:center;color:#94a3b8;font-size:12px;margin-bottom:12px';
 
     var container = document.createElement('div');
     container.id = CONTAINER_ID;
+    container.style.cssText = 'width:100%;display:flex;justify-content:center';
 
     wrap.appendChild(divider);
     wrap.appendChild(container);
-    form.insertAdjacentElement('afterend', wrap);
+    form.appendChild(wrap);
 
     if (window.VkAuth) {
       window.VkAuth.render(container);
