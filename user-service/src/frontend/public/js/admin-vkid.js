@@ -18,6 +18,15 @@
     var form = passwordInput.closest('form');
     if (!form) return false;
 
+    // Карточка логина AdminJS имеет фиксированную height:440px — из-за доп. кнопки
+    // контент вылезает за нижнюю кромку. Разрешаем карточке расти (родитель формы),
+    // синяя панель — flex-сосед со stretch — подтянется по высоте.
+    var card = form.parentElement;
+    if (card) {
+      card.style.height = 'auto';
+      card.style.minHeight = '440px';
+    }
+
     // Вставляем ВНУТРЬ формы последним элементом (после кнопки «Войти»), иначе
     // блок становится соседним flex-элементом панели AdminJS и улетает в угол.
     var wrap = document.createElement('div');
@@ -36,6 +45,33 @@
     wrap.appendChild(divider);
     wrap.appendChild(container);
     form.appendChild(wrap);
+
+    // Виджет VK лежит внутри формы AdminJS. Если OneTap рендерит обычную
+    // <button> (без type), её клик сабмитит форму с пустыми email/паролем →
+    // «Неверный email/пароль». Блокируем сабмит, исходящий из контейнера VK
+    // (реальная кнопка «Войти» и наш программный submit на /admin/login —
+    // отдельная форма на body — не затрагиваются).
+    form.addEventListener(
+      'submit',
+      function (e) {
+        if (e.submitter && container.contains(e.submitter)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true,
+    );
+
+    // Дополнительно: любую <button> внутри виджета помечаем type="button",
+    // чтобы она не была submit-кнопкой формы (VK может дорисовать её асинхронно).
+    function neutralizeButtons() {
+      container.querySelectorAll('button:not([type])').forEach(function (b) {
+        b.type = 'button';
+      });
+    }
+    neutralizeButtons();
+    var mo = new MutationObserver(neutralizeButtons);
+    mo.observe(container, { childList: true, subtree: true });
 
     if (window.VkAuth) {
       window.VkAuth.render(container);
