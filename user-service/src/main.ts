@@ -20,6 +20,10 @@ async function bootstrap() {
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
       crossOriginResourcePolicy: { policy: 'cross-origin' },
+      // VK ID при alternative-login открывает попап и общается через
+      // window.opener — дефолтный COOP 'same-origin' это рвёт. Разрешаем
+      // попапы, сохраняя изоляцию от чужих окон.
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     }),
   );

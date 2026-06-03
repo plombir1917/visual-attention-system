@@ -30,7 +30,13 @@ export class AuthService {
       const user = await this.prismaService.user.findUnique({
         where: { email },
       });
-      if (user && (await comparePassword(rawPassword, user.password))) {
+      // Пользователи, зарегистрированные через VK ID, не имеют пароля и входят
+      // только через VK ID — форму email/пароль для них не пропускаем.
+      if (
+        user &&
+        user.password &&
+        (await comparePassword(rawPassword, user.password))
+      ) {
         return { id: user.id, email: user.email };
       }
       return null;
