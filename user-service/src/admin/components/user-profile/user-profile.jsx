@@ -45,30 +45,27 @@ export default function UserProfile() {
   const userId = profile?.id ?? currentAdmin?.id ?? '—';
 
   return (
-    <Box
-      px="xl"
-      py="xl"
-      style={{ fontFamily: `'Segoe UI', Roboto, Helvetica, Arial, sans-serif`, maxWidth: 760 }}
-    >
+    <div className="vas-page">
+      <style>{PAGE_CSS}</style>
       <PageHeader />
 
-      <ProfileCard
-        name={name}
-        email={email}
-        role={role}
-        createdAt={createdAt}
-        userId={userId}
-        fetching={fetching}
-      />
+      <div className="vas-grid-2">
+        <ProfileCard
+          name={name}
+          email={email}
+          role={role}
+          createdAt={createdAt}
+          userId={userId}
+          fetching={fetching}
+        />
 
-      <Box mt="xl">
         <ApiKeyBlock
           userId={currentAdmin?.id}
           hasApiKey={hasApiKey}
           onKeyGenerated={() => setHasApiKey(true)}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 
@@ -76,13 +73,7 @@ export default function UserProfile() {
 
 function ProfileCard({ name, email, role, createdAt, userId, fetching }) {
   return (
-    <Box
-      variant="container"
-      border
-      rounded
-      p="xxl"
-      style={{ background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-    >
+    <Box variant="container" p="xxl" className="vas-card" style={{ background: '#fff' }}>
       <AvatarBlock name={name} email={email} />
 
       {fetching && (
@@ -154,13 +145,7 @@ function ApiKeyBlock({ userId, hasApiKey, onKeyGenerated }) {
   }
 
   return (
-    <Box
-      variant="container"
-      border
-      rounded
-      p="xxl"
-      style={{ background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-    >
+    <Box variant="container" p="xxl" className="vas-card" style={{ background: '#fff' }}>
       <SectionHeader
         title="API-ключ"
         subtitle="Используется для программного доступа к сервису"
@@ -295,15 +280,12 @@ function ApiKeyBlock({ userId, hasApiKey, onKeyGenerated }) {
 
 function PageHeader() {
   return (
-    <Box mb="xl">
-      <H2 style={{ fontWeight: 700, fontSize: 26, letterSpacing: '-0.5px' }}>
-        Мой профиль
-      </H2>
+    <div className="vas-head">
+      <H2 className="vas-head-title">Мой профиль</H2>
       <Text variant="sm" color="grey60" style={{ fontSize: 14, lineHeight: 1.4 }}>
         Информация о вашей учётной записи
       </Text>
-      <hr style={{ marginTop: 14, border: 0, borderTop: '1px solid #eee' }} />
-    </Box>
+    </div>
   );
 }
 
@@ -441,3 +423,15 @@ function formatDate(raw) {
     return String(raw);
   }
 }
+
+/* ── Shared page styles (full-width, responsive grid, hover polish) ── */
+
+const PAGE_CSS = `
+.vas-page{width:100%;max-width:1800px;margin:0 auto;box-sizing:border-box;padding:24px 28px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#111;}
+.vas-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #e5e7eb;}
+.vas-head-title{font-weight:700;font-size:26px;margin:0 0 4px;letter-spacing:-.4px;}
+.vas-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px;align-items:start;}
+.vas-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(15,23,42,.06);box-sizing:border-box;transition:box-shadow .18s ease,transform .18s ease;}
+.vas-card:hover{box-shadow:0 8px 24px rgba(15,23,42,.09);}
+@media(max-width:680px){.vas-page{padding:16px 14px;}.vas-head-title{font-size:22px;}}
+`;
