@@ -38,6 +38,13 @@ async function bootstrap() {
             'application/manifest+json; charset=utf-8',
           );
         }
+        if (file.endsWith('.ico')) {
+          // Match the type declared in the <link rel="icon"> tags
+          // (image/x-icon). serve-static defaults to image/vnd.microsoft.icon,
+          // and Yandex's favicon checker wants the served Content-Type to match
+          // the link's `type` attribute exactly.
+          res.setHeader('Content-Type', 'image/x-icon');
+        }
         if (file.endsWith('/sw.js')) {
           // The service worker must always be revalidated, and is allowed to
           // control the whole origin.
