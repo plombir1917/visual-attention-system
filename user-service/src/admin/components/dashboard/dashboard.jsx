@@ -58,6 +58,9 @@ export default function Dashboard() {
         <hr style={{ margin: '12px 0 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
       </div>
 
+      {/* API-key hint — показываем, пока ключ не сгенерирован */}
+      {data.hasApiKey === false && <ApiKeyHint />}
+
       {/* KPI Row */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
         <KpiCard label="Пользователи" value={data.totalUsers} sub="всего в системе" accent="#3b82f6" />
@@ -215,6 +218,31 @@ function SessionSelector({ sessions, selectedId, loading, onChange }) {
 }
 
 /* ── Sub-components ─────────────────────────────────────────────── */
+
+function ApiKeyHint() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', background: '#eff6ff', border: '1px solid #bfdbfe', borderLeft: '4px solid #3b82f6', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+      </svg>
+      <div style={{ flex: '1 1 280px', minWidth: 240 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#1e3a8a', marginBottom: 2 }}>
+          Сгенерируйте API-ключ
+        </div>
+        <Text style={{ fontSize: 13, color: '#1e40af', lineHeight: 1.5 }}>
+          Чтобы подключать клиентов и собирать сессии, нужен API-ключ.
+          Сгенерировать его можно на странице профиля.
+        </Text>
+      </div>
+      <a
+        href="/admin/pages/my-profile"
+        style={{ flexShrink: 0, alignSelf: 'center', display: 'inline-block', padding: '8px 16px', borderRadius: 8, background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+      >
+        Перейти в профиль →
+      </a>
+    </div>
+  );
+}
 
 function KpiCard({ label, value, sub, accent }) {
   return (

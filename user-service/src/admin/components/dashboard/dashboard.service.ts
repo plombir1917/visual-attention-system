@@ -26,10 +26,10 @@ export class DashboardService {
   async getDashboardMetrics(userId?: string, sessionId?: string) {
     const userWhere = userId ? { user_id: userId } : {};
 
-    const [totalUsers, totalSessions, sessionsList] = await Promise.all([
-      userId
-        ? this.prisma.user.count({ where: { id: userId } })
-        : this.prisma.user.count(),
+    const [totalUsers, totalSessions, sessionsList, apiKey] = await Promise.all([
+      // Карточка подписана «всего в системе» — счёт всегда глобальный, а не
+      // по текущему пользователю (иначе всегда было бы 1).
+      this.prisma.user.count(),
       userId
         ? this.prisma.session.count({ where: userWhere })
         : this.prisma.session.count(),
@@ -38,12 +38,27 @@ export class DashboardService {
         orderBy: { ended_at: 'desc' },
         select: { id: true, started_at: true, ended_at: true },
       }),
+      userId
+        ? this.prisma.api_key.findUnique({
+            where: { user_id: userId },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
     ]);
+
+    // Есть ли у текущего пользователя API-ключ (для подсказки на дашборде).
+    const hasApiKey = !!apiKey;
 
     const targetId = sessionId || sessionsList[0]?.id;
 
     if (!targetId) {
-      return { totalUsers, totalSessions, sessionsList: [], selectedSession: null };
+      return {
+        totalUsers,
+        totalSessions,
+        hasApiKey,
+        sessionsList: [],
+        selectedSession: null,
+      };
     }
 
     const session = await this.prisma.session.findFirst({
@@ -58,6 +73,7 @@ export class DashboardService {
       return {
         totalUsers,
         totalSessions,
+        hasApiKey,
         sessionsList: this.toSessionList(sessionsList),
         selectedSession: null,
       };
@@ -83,6 +99,7 @@ export class DashboardService {
     return {
       totalUsers,
       totalSessions,
+      hasApiKey,
       sessionsList: this.toSessionList(sessionsList),
       selectedSession: {
         id: session.id,

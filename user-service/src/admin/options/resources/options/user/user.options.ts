@@ -14,7 +14,8 @@ export class UserOptions {
 
   get(): ResourceOptions {
     return {
-      navigation: { icon: 'User' },
+      // Ресурс убран из бокового меню — список пользователей не должен быть доступен.
+      navigation: false,
       properties: {
         password: { isVisible: false },
       },
@@ -23,12 +24,21 @@ export class UserOptions {
         edit: { isVisible: false },
         delete: { isVisible: false },
         bulkDelete: { isVisible: false },
-        list: { after: [hidePassword] },
-        search: { after: [hidePassword] },
-        show: { after: [hidePassword, this.appendApiKeyStatus.bind(this)] },
+        // Просмотр и поиск по всем пользователям закрыты полностью.
+        list: { isVisible: false, isAccessible: false },
+        search: { isVisible: false, isAccessible: false },
+        // show нужен только странице «Мой профиль» (UserProfile дергает его через
+        // API для своей записи), поэтому оставляем доступным, но лишь для своей
+        // записи и без кнопки в интерфейсе.
+        show: {
+          isVisible: false,
+          isAccessible: isOwnRecord,
+          after: [hidePassword, this.appendApiKeyStatus.bind(this)],
+        },
         'generate-api-key': {
           actionType: 'record',
-          isAccessible: ({ currentAdmin }) => !!currentAdmin,
+          isVisible: false,
+          isAccessible: isOwnRecord,
           handler: this.handleGenerateApiKey.bind(this),
         },
       },
@@ -66,6 +76,14 @@ export class UserOptions {
       generatedKey: rawKey,
     };
   }
+}
+
+// Доступ к записи только владельцу: recordId должен совпадать с currentAdmin.id.
+// Без записи в контексте (например, при отрисовке меню) — не блокируем.
+function isOwnRecord({ currentAdmin, record }: ActionContext): boolean {
+  if (!currentAdmin) return false;
+  const recordId = record?.params?.id;
+  return !recordId || recordId === currentAdmin.id;
 }
 
 function hidePassword(response: ActionResponse) {
