@@ -149,12 +149,12 @@ export default function Statistics() {
   const worst     = sorted.slice(-3).reverse();
 
   return (
-    <div style={page}>
+    <div className="vas-page">
+      <style>{PAGE_CSS}</style>
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <H2 style={{ fontWeight: 700, fontSize: 26, marginBottom: 4 }}>Статистика</H2>
+      <div className="vas-head">
+        <H2 className="vas-head-title">Статистика</H2>
         <Text color="grey60" style={{ fontSize: 14 }}>Аналитика по сессиям внимания за выбранный период</Text>
-        <hr style={{ margin: '12px 0 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
       </div>
 
       {/* Period selector */}
@@ -190,7 +190,7 @@ export default function Statistics() {
       ) : (
         <>
           {/* ── KPI cards ── */}
-          <div style={row(16, { marginBottom: 20 })}>
+          <div className="vas-kpi-grid">
             <KpiCard label="Сессий" value={t.sessions} sub="за период" accent="#8b5cf6" />
             <KpiCard label="Ср. фокус" value={`${t.avgFocusRate}%`} sub="по сессиям" accent={fc(t.avgFocusRate)} />
             <KpiCard label="Общий фокус" value={`${t.focusRate}%`} sub="по всем кадрам" accent={fc(t.focusRate)} />
@@ -224,7 +224,7 @@ export default function Statistics() {
               </Panel>
 
               {/* ── Focus per session + Duration per session ── */}
-              <div style={row(16, { marginBottom: 20 })}>
+              <div className="vas-grid-2">
                 <Panel title="Фокус по сессиям (%)" style={{ flex: '1 1 320px', minWidth: 280 }}>
                   <SessionBars sessions={sessions} vKey="focusRate" yMax={100} yUnit="%" getColor={fc} />
                 </Panel>
@@ -234,7 +234,7 @@ export default function Statistics() {
               </div>
 
               {/* ── Distribution + By weekday ── */}
-              <div style={row(16, { marginBottom: 20 })}>
+              <div className="vas-grid-2">
                 <Panel title="Распределение фокуса по сессиям" style={{ flex: '1 1 280px', minWidth: 240 }}>
                   <CatBars
                     data={distrib}
@@ -269,7 +269,7 @@ export default function Statistics() {
               </Panel>
 
               {/* ── Best / worst sessions ── */}
-              <div style={row(16, { marginBottom: 20 })}>
+              <div className="vas-grid-3">
                 <Panel title="Лучшие сессии" style={{ flex: '1 1 280px', minWidth: 240 }}>
                   <TopSessionsList sessions={best} variant="best" />
                 </Panel>
@@ -576,9 +576,9 @@ function SessionsTable({ sessions }) {
 
 function KpiCard({ label, value, sub, accent }) {
   return (
-    <div style={{ flex: '1 1 130px', minWidth: 120, background: '#fff', border: '1px solid #e5e7eb', borderTop: `4px solid ${accent}`, borderRadius: 10, padding: '16px 18px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', boxSizing: 'border-box' }}>
+    <div className="vas-card vas-kpi" style={{ borderTop: `4px solid ${accent}`, padding: '18px 20px' }}>
       <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 700, color: '#111', lineHeight: 1.3, margin: '6px 0 4px' }}>{value}</div>
+      <div style={{ fontSize: 28, fontWeight: 700, color: '#111', lineHeight: 1.25, margin: '8px 0 4px' }}>{value}</div>
       <div style={{ fontSize: 11, color: '#b3b3b3' }}>{sub}</div>
     </div>
   );
@@ -586,7 +586,7 @@ function KpiCard({ label, value, sub, accent }) {
 
 function Panel({ title, children, style }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '16px 18px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', boxSizing: 'border-box', ...style }}>
+    <div className="vas-card" style={{ padding: '18px 20px', ...style }}>
       {title ? <div style={{ fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>{title}</div> : null}
       {children}
     </div>
@@ -608,11 +608,18 @@ function CenteredNote({ text }) {
 
 /* ── Styles ─────────────────────────────────────────────────────── */
 
-const page = { padding: '24px 28px', fontFamily: `'Segoe UI', Roboto, Arial, sans-serif`, maxWidth: 1280, boxSizing: 'border-box' };
-
-function row(gap, extra) {
-  return { display: 'flex', flexWrap: 'wrap', gap, ...extra };
-}
+const PAGE_CSS = `
+.vas-page{width:100%;max-width:1800px;margin:0 auto;box-sizing:border-box;padding:24px 28px;font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#111;}
+.vas-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #e5e7eb;}
+.vas-head-title{font-weight:700;font-size:26px;margin:0 0 4px;letter-spacing:-.4px;}
+.vas-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px;}
+.vas-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:20px;align-items:start;}
+.vas-grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:20px;align-items:start;}
+.vas-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(15,23,42,.06);box-sizing:border-box;transition:box-shadow .18s ease,transform .18s ease;}
+.vas-card:hover{box-shadow:0 8px 24px rgba(15,23,42,.09);}
+.vas-kpi:hover{transform:translateY(-3px);}
+@media(max-width:680px){.vas-page{padding:16px 14px;}.vas-head-title{font-size:22px;}}
+`;
 
 function presetBtn(active) {
   return { padding: '6px 14px', borderRadius: 6, fontSize: 13, cursor: 'pointer', border: active ? '1.5px solid #6366f1' : '1px solid #e5e7eb', background: active ? '#eef2ff' : '#fff', color: active ? '#4f46e5' : '#374151', fontWeight: active ? 600 : 400 };

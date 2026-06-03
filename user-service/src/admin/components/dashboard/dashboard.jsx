@@ -47,19 +47,22 @@ export default function Dashboard() {
   const list = data?.sessionsList ?? [];
 
   return (
-    <div style={{ padding: '24px 28px', fontFamily: `'Segoe UI', Roboto, Arial, sans-serif`, maxWidth: 1280, boxSizing: 'border-box' }}>
+    <div className="vas-page">
+      <style>{PAGE_CSS}</style>
 
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <H2 style={{ fontWeight: 700, fontSize: 26, marginBottom: 4 }}>Панель управления</H2>
+      <div className="vas-head">
+        <H2 className="vas-head-title">Панель управления</H2>
         <Text color="grey60" style={{ fontSize: 14 }}>
           Ключевые метрики и анализ выбранной сессии
         </Text>
-        <hr style={{ margin: '12px 0 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
       </div>
 
+      {/* API-key hint — показываем, пока ключ не сгенерирован */}
+      {data.hasApiKey === false && <ApiKeyHint />}
+
       {/* KPI Row */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+      <div className="vas-kpi-grid">
         <KpiCard label="Пользователи" value={data.totalUsers} sub="всего в системе" accent="#3b82f6" />
         <KpiCard label="Сессий" value={data.totalSessions} sub="завершено" accent="#8b5cf6" />
         {s ? (
@@ -114,7 +117,7 @@ export default function Dashboard() {
           </div>
 
           {/* Line charts */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+          <div className="vas-grid-3">
             <Panel title="θ (teta) — угол взгляда" style={{ flex: '1 1 260px', minWidth: 220 }}>
               <LineChart data={s.attentions} vKey="teta" color="#8b5cf6" />
             </Panel>
@@ -216,11 +219,36 @@ function SessionSelector({ sessions, selectedId, loading, onChange }) {
 
 /* ── Sub-components ─────────────────────────────────────────────── */
 
+function ApiKeyHint() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', background: '#eff6ff', border: '1px solid #bfdbfe', borderLeft: '4px solid #3b82f6', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+      </svg>
+      <div style={{ flex: '1 1 280px', minWidth: 240 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#1e3a8a', marginBottom: 2 }}>
+          Сгенерируйте API-ключ
+        </div>
+        <Text style={{ fontSize: 13, color: '#1e40af', lineHeight: 1.5 }}>
+          Чтобы подключать клиентов и собирать сессии, нужен API-ключ.
+          Сгенерировать его можно на странице профиля.
+        </Text>
+      </div>
+      <a
+        href="/admin/pages/my-profile"
+        style={{ flexShrink: 0, alignSelf: 'center', display: 'inline-block', padding: '8px 16px', borderRadius: 8, background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+      >
+        Перейти в профиль →
+      </a>
+    </div>
+  );
+}
+
 function KpiCard({ label, value, sub, accent }) {
   return (
-    <div style={{ flex: '1 1 140px', minWidth: 130, background: '#fff', border: '1px solid #e5e7eb', borderTop: `4px solid ${accent}`, borderRadius: 10, padding: '16px 18px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', boxSizing: 'border-box' }}>
+    <div className="vas-card vas-kpi" style={{ borderTop: `4px solid ${accent}`, padding: '18px 20px' }}>
       <div style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{label}</div>
-      <div style={{ fontSize: 30, fontWeight: 700, color: '#111', lineHeight: 1.3, margin: '6px 0 4px' }}>{value}</div>
+      <div style={{ fontSize: 30, fontWeight: 700, color: '#111', lineHeight: 1.25, margin: '8px 0 4px' }}>{value}</div>
       <div style={{ fontSize: 11, color: '#b3b3b3' }}>{sub}</div>
     </div>
   );
@@ -228,7 +256,7 @@ function KpiCard({ label, value, sub, accent }) {
 
 function Panel({ title, children, style }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '16px 18px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', boxSizing: 'border-box', ...style }}>
+    <div className="vas-card" style={{ padding: '18px 20px', ...style }}>
       {title ? <div style={{ fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>{title}</div> : null}
       {children}
     </div>
@@ -410,3 +438,18 @@ function fmtTime(iso) {
     return new Date(iso).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
   } catch { return iso; }
 }
+
+/* ── Shared page styles (full-width, responsive grids, hover polish) ── */
+
+const PAGE_CSS = `
+.vas-page{width:100%;max-width:1800px;margin:0 auto;box-sizing:border-box;padding:24px 28px;font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#111;}
+.vas-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #e5e7eb;}
+.vas-head-title{font-weight:700;font-size:26px;margin:0 0 4px;letter-spacing:-.4px;}
+.vas-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px;}
+.vas-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:20px;align-items:start;}
+.vas-grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:20px;align-items:start;}
+.vas-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(15,23,42,.06);box-sizing:border-box;transition:box-shadow .18s ease,transform .18s ease;}
+.vas-card:hover{box-shadow:0 8px 24px rgba(15,23,42,.09);}
+.vas-kpi:hover{transform:translateY(-3px);}
+@media(max-width:680px){.vas-page{padding:16px 14px;}.vas-head-title{font-size:22px;}}
+`;
