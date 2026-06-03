@@ -32,7 +32,9 @@ export class AttentionOptions {
           isAccessible: false,
         },
         // Показываем только результаты внимания из сессий авторизованного пользователя.
+        // showFilter:false убирает кнопку «Фильтр» и сам drawer из списка.
         list: {
+          showFilter: false,
           handler: scopedListHandler(
             (userId, query) => this.prisma.findAttentionsByUser(userId, query),
             ['id', 'session_id', 'focus', 'teta', 'alpha', 'distance', 'created_at'],

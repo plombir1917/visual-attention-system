@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ResourceOptions } from 'adminjs';
 import { PrismaService } from '../../../../../../prisma/prisma.service.js';
 import { scopedListHandler } from '../scoped-list.handler.js';
-import {
-  ownershipSearchFilter,
-  ownershipShowGuard,
-} from '../scoped-guards.js';
+import { ownershipSearchFilter, ownershipShowGuard } from '../scoped-guards.js';
 
 @Injectable()
 export class SessionOptions {
@@ -33,6 +30,7 @@ export class SessionOptions {
         },
         // Показываем только сессии авторизованного пользователя.
         list: {
+          showFilter: false,
           handler: scopedListHandler(
             (userId, query) => this.prisma.findSessionsByUser(userId, query),
             ['id', 'user_id', 'started_at', 'ended_at'],
