@@ -6,6 +6,10 @@ out/
 release/
 dist/
 
+# Temp transpiled Vite/electron-vite configs (regenerated each build)
+electron.vite.config.*.mjs
+*.timestamp-*.mjs
+
 # Environment
 .env
 .env.local

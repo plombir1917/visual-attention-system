@@ -69,13 +69,33 @@
               v-for="d in durations"
               :key="d"
               class="pill"
-              :class="{ active: store.sessionDuration === d }"
+              :class="{ active: !customMinutes && store.sessionDuration === d }"
               :disabled="store.sessionState !== 'idle'"
-              @click="store.setSessionDuration(d)"
+              @click="selectPreset(d)"
             >
               {{ d }} мин
             </button>
           </div>
+
+          <!-- Custom duration -->
+          <div class="duration-custom">
+            <input
+              type="number"
+              inputmode="numeric"
+              class="custom-input"
+              :class="{ invalid: !!customError }"
+              :min="MIN_DURATION_MIN"
+              :max="MAX_DURATION_MIN"
+              step="1"
+              placeholder="Своё время"
+              :disabled="store.sessionState !== 'idle'"
+              v-model="customMinutes"
+              @input="applyCustom"
+            />
+            <span class="custom-unit">мин</span>
+          </div>
+          <span v-if="customError" class="custom-hint">{{ customError }}</span>
+          <span v-else class="custom-range">От 1 минуты до 8 часов (480 мин)</span>
         </div>
 
         <!-- Timer -->
@@ -110,6 +130,7 @@
           <button
             v-if="store.sessionState === 'idle' || store.sessionState === 'ended'"
             class="btn-start"
+            :disabled="!canStart"
             @click="startSession"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -146,11 +167,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAppStore } from '../stores/app'
+import { useAppStore, MIN_DURATION_MIN, MAX_DURATION_MIN } from '../stores/app'
 import { SessionService } from '../services/session'
 import { CameraError } from '../services/camera'
+import alarmSrc from '../assets/attention-sound.mp3'
 
 const router = useRouter()
 const store = useAppStore()
@@ -159,8 +181,71 @@ const videoEl = ref<HTMLVideoElement | null>(null)
 const errorMsg = ref('')
 const durations = [15, 30, 45, 60]
 
+// Произвольная длительность. Внимание: v-model на <input type="number"> приводит
+// значение к числу (пустое поле → ''), поэтому тип number | string, а перед
+// строковыми операциями значение приводим через String().
+const customMinutes = ref<number | string>('')
+const customError = ref('')
+
+function selectPreset(d: number) {
+  store.setSessionDuration(d)
+  customMinutes.value = ''
+  customError.value = ''
+}
+
+// Единая валидация произвольного времени: целое число минут в диапазоне [1, 480].
+// Пустое поле — это «использовать выбранный пресет», поэтому считается валидным.
+// При корректном вводе пишем значение в стор. Возвращает true, если можно стартовать.
+// Вызывается и по @input (живой фидбек), и в startSession (жёсткая проверка до камеры).
+function validateCustomDuration(): boolean {
+  const raw = String(customMinutes.value).trim()
+  if (raw === '') {
+    customError.value = ''
+    return true
+  }
+  const n = Number(raw)
+  if (!Number.isInteger(n)) {
+    customError.value = 'Введите целое число минут'
+    return false
+  }
+  if (n < MIN_DURATION_MIN || n > MAX_DURATION_MIN) {
+    customError.value = `Допустимо от ${MIN_DURATION_MIN} до ${MAX_DURATION_MIN} мин (8 ч)`
+    return false
+  }
+  customError.value = ''
+  store.setSessionDuration(n)
+  return true
+}
+
+function applyCustom() {
+  validateCustomDuration()
+}
+
+const canStart = computed(() => !customError.value)
+
 const session = new SessionService()
 let timerInterval: ReturnType<typeof setInterval> | null = null
+
+// Звук будильника при длительном отвлечении: зациклен, играет пока внимание не
+// восстановится (store.alarmActive снимается первым же кадром focus=true).
+const alarmAudio = new Audio(alarmSrc)
+alarmAudio.loop = true
+
+function stopAlarm() {
+  alarmAudio.pause()
+  alarmAudio.currentTime = 0
+}
+
+watch(
+  () => store.alarmActive,
+  (active) => {
+    if (active) {
+      alarmAudio.play().catch(() => {}) // на случай отказа автоплея
+    } else {
+      stopAlarm()
+    }
+  },
+)
 
 const maskedKey = computed(() => {
   const k = store.apiKey
@@ -192,12 +277,21 @@ const progressPct = computed(() => {
 })
 
 function formatTime(secs: number): string {
-  const m = Math.floor(secs / 60).toString().padStart(2, '0')
+  const h = Math.floor(secs / 3600)
+  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0')
   const s = (secs % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
+  // Сессия может длиться до 8 часов — показываем часы, когда они есть.
+  return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`
 }
 
 async function startSession() {
+  // Жёстко перепроверяем время прямо здесь — до обращения к камере, чтобы
+  // невалидный ввод отсекался понятной ошибкой длительности, а не «камера не найдена».
+  // Дублируем текст в общий баннер ошибок — как для ошибок камеры/связи.
+  if (!validateCustomDuration()) {
+    errorMsg.value = customError.value
+    return
+  }
   errorMsg.value = ''
   store.resetSession()
   store.setSessionState('connecting')
@@ -244,6 +338,7 @@ function stopSession() {
     timerInterval = null
   }
   session.disconnect()
+  stopAlarm()
   store.setSessionState('ended')
 }
 
@@ -256,6 +351,7 @@ function handleDisconnect() {
 onUnmounted(() => {
   if (timerInterval) clearInterval(timerInterval)
   session.disconnect()
+  stopAlarm()
 })
 </script>
 
@@ -475,6 +571,52 @@ onUnmounted(() => {
 .pill:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.duration-custom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.custom-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text);
+  transition: border-color 0.15s;
+}
+.custom-input:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+.custom-input.invalid {
+  border-color: var(--red);
+}
+.custom-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.custom-unit {
+  font-size: 13px;
+  color: var(--muted);
+}
+.custom-hint {
+  font-size: 11px;
+  color: var(--red);
+}
+.custom-range {
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.btn-start:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .timer-section {
