@@ -1,9 +1,13 @@
 // ФОКУС — service worker. Makes the landing installable and resilient offline.
 // Strategy:
 //   • navigations  → network-first (fresh HTML), fall back to cached shell offline
-//   • static GET   → stale-while-revalidate (instant load, refresh in background)
+//   • JS/CSS       → network-first (fresh code on every load, cache only offline)
+//   • other static → stale-while-revalidate (instant load, refresh in background)
 //   • /admin & API → never handled by the SW (always hit the network)
-const VERSION = 'focus-v1';
+// JS/CSS use network-first because the files are not content-hashed: with
+// stale-while-revalidate the browser would render last deploy's code and only
+// pick up the new one on the *next* load (hence "old version until Ctrl+F5").
+const VERSION = 'focus-v2';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 
@@ -68,7 +72,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: stale-while-revalidate.
+  // Code (JS/CSS): network-first so a deploy takes effect on the very next
+  // load, not one load later. Cache is updated for offline fallback only.
+  if (/\.(js|css)(\?|$)/.test(url.pathname)) {
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === 'basic') {
+            const copy = res.clone();
+            caches.open(RUNTIME).then((cache) => cache.put(request, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(request)),
+    );
+    return;
+  }
+
+  // Other static assets (images, fonts, manifest): stale-while-revalidate.
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request)
