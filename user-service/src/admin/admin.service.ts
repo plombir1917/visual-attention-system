@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DashboardService } from './components/dashboard/dashboard.service.js';
 import { StatisticsService } from './components/statistics/statistics.service.js';
 import { AuthService } from './auth/auth.service.js';
-import { VkidService } from './auth/vkid.service.js';
+import { VkidService, VkNoEmailError } from './auth/vkid.service.js';
 import { AdminJSOptions, Locale } from 'adminjs';
 import { componentLoader, Components } from './components/components.config.js';
 import { customTheme } from './options/themes/custom.theme.js';
@@ -112,9 +112,20 @@ export class AdminJSService {
           | string
           | undefined;
         if (vkAccessToken) {
-          return await this.vkidService.authenticateByAccessToken(
-            vkAccessToken,
-          );
+          try {
+            return await this.vkidService.authenticateByAccessToken(
+              vkAccessToken,
+            );
+          } catch (err) {
+            // У VK-аккаунта нет email — показываем конкретное сообщение.
+            // @adminjs/express (login.handler) выводит error.message как текст
+            // ошибки на странице логина; одиночный ключ прогоняется через локаль,
+            // поэтому бросаем ключ перевода 'vkNoEmail' (см. en.locale.ts).
+            if (err instanceof VkNoEmailError) {
+              throw new Error('vkNoEmail');
+            }
+            throw err;
+          }
         }
         return await this.authService.login(email, password);
       },
