@@ -99,6 +99,13 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { SessionService } from './services/session'
 import { WS_URL, type AttentionResult } from './types'
+// Инлайн (base64), чтобы виджет остался единым самодостаточным файлом.
+import alarmSrc from './assets/attention-sound.mp3?inline'
+
+// Кадры идут раз в секунду, поэтому 60 кадров подряд «отвлечён» = 1 минута.
+const DISTRACTION_ALARM_FRAMES = 60
+// Скрытое ограничение: сессия не может длиться дольше 8 часов.
+const MAX_SESSION_SECONDS = 8 * 60 * 60
 
 const props = withDefaults(defineProps<{
   apiKey?: string
@@ -133,6 +140,23 @@ const focusPercent = computed(() =>
 const session = new SessionService()
 let timerHandle: ReturnType<typeof setInterval> | null = null
 
+// ─── distraction alarm ───────────────────────────────────────
+// Серия подряд идущих кадров «отвлечён». Будильник зациклен и звучит, пока не
+// придёт первый кадр focus=true (как в десктоп-клиенте).
+let distractedStreak = 0
+const alarm = new Audio(alarmSrc)
+alarm.loop = true
+
+function stopAlarm() {
+  alarm.pause()
+  alarm.currentTime = 0
+}
+
+function resetAlarm() {
+  distractedStreak = 0
+  stopAlarm()
+}
+
 // ─── theme / position classes ─────────────────────────────────
 const themeClass = computed(() => ({
   'theme-light': props.theme === 'light',
@@ -166,6 +190,7 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', onVisibilityChange)
   session.disconnect()
   clearTimer()
+  stopAlarm()
 })
 
 // ─── actions ─────────────────────────────────────────────────
@@ -198,6 +223,7 @@ async function startSession() {
   elapsedSeconds.value = 0
   focusCount.value = 0
   totalFrames.value = 0
+  resetAlarm()
 
   try {
     await session.connect(
@@ -207,6 +233,17 @@ async function startSession() {
         latestResult.value = result
         totalFrames.value++
         if (result.focus && tabVisible.value) focusCount.value++
+
+        // Тревога: после минуты непрерывного отвлечения включаем зацикленный
+        // звук; снимаем его только при восстановлении внимания (focus=true).
+        if (result.focus) {
+          resetAlarm()
+        } else {
+          distractedStreak++
+          if (distractedStreak >= DISTRACTION_ALARM_FRAMES) {
+            alarm.play().catch(() => {}) // на случай отказа автоплея
+          }
+        }
       },
       (reason) => {
         if (sessionState.value === 'active') {
@@ -232,11 +269,16 @@ async function startSession() {
 function stopSession() {
   session.disconnect()
   clearTimer()
+  resetAlarm()
   sessionState.value = 'ended'
 }
 
 function startTimer() {
-  timerHandle = setInterval(() => elapsedSeconds.value++, 1000)
+  timerHandle = setInterval(() => {
+    elapsedSeconds.value++
+    // Скрытый предел длительности сессии — 8 часов.
+    if (elapsedSeconds.value >= MAX_SESSION_SECONDS) stopSession()
+  }, 1000)
 }
 
 function clearTimer() {
