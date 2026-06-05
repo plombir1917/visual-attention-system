@@ -83,6 +83,7 @@ export const en = {
     loading: 'Загрузка...',
     searchResults: 'Результаты поиска',
     invalidCredentials: 'Неверный email и/или пароль',
+    vkNoEmail: 'Нет привязанной почты к ВК, это обязательно',
     bulkDeleteError: 'Ошибка при удалении записей',
     errorFetchingRecords: 'Ошибка при загрузке записей',
     errorUpdatingRecord: 'Ошибка при обновлении записи. Подробности в консоли.',

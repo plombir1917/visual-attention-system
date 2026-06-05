@@ -2,6 +2,19 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 
 /**
+ * Бросается, когда VK-токен валиден, но у аккаунта нет привязанного email.
+ * Отделяет этот случай от «невалидного токена» (тот по-прежнему возвращает null),
+ * чтобы страница логина могла показать конкретное сообщение, а не общее
+ * «неверный email или пароль».
+ */
+export class VkNoEmailError extends Error {
+  constructor() {
+    super('VK account has no email');
+    this.name = 'VkNoEmailError';
+  }
+}
+
+/**
  * Авторизация через VK ID.
  *
  * @description
@@ -30,8 +43,9 @@ export class VkidService {
 
   /**
    * Проверяет VK access_token и возвращает локального пользователя (создавая или
-   * связывая его при необходимости). Возвращает `null`, если токен невалиден или
-   * у VK-аккаунта нет email (вход в таком случае отклоняется).
+   * связывая его при необходимости). Возвращает `null`, если токен невалиден.
+   * Если токен валиден, но у VK-аккаунта нет email — бросает {@link VkNoEmailError}
+   * (email обязателен), чтобы вызывающий показал отдельное сообщение об этом.
    */
   async authenticateByAccessToken(
     accessToken: string,
@@ -51,7 +65,7 @@ export class VkidService {
     // По требованию: email обязателен.
     if (!email) {
       this.logger.warn(`VK user ${vkId} has no email — login rejected`);
-      return null;
+      throw new VkNoEmailError();
     }
 
     const name =
